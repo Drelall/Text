@@ -1,4 +1,4 @@
-const CACHE_NAME = 'scribouillart-editor-v2';
+const CACHE_NAME = 'scribouillart-editor-v3';
 
 const APP_SHELL = [
   './',

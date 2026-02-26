@@ -650,3 +650,106 @@ body.editor-page .main {
     position: relative;
     display: inline-block;
 }
+
+/* ========================================
+   RESPONSIVE MOBILE
+   ======================================== */
+
+/* Bouton toggle sidebar (mobile uniquement) */
+.sidebar-toggle-btn {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    /* Header */
+    .logo {
+        font-size: 2.2rem;
+    }
+    .header .container {
+        padding: 0.5rem 1rem;
+    }
+
+    /* Top bar */
+    .top-bar {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0.4rem 0.75rem;
+        gap: 0.4rem;
+    }
+    .top-bar-left {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .toolbar {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 2px;
+    }
+    .top-bar-actions {
+        justify-content: flex-end;
+    }
+
+    /* Bouton toggle sidebar visible */
+    .sidebar-toggle-btn {
+        display: inline-flex;
+    }
+
+    /* Layout éditeur : empilement vertical */
+    .editor-container {
+        flex-direction: column;
+        min-height: unset;
+    }
+
+    /* Sidebar masquée par défaut, ouverte avec .open */
+    .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--editor-border-color);
+        padding: 0.75rem;
+        display: none;
+        max-height: 40vh;
+        overflow-y: auto;
+    }
+    .sidebar.open {
+        display: block;
+    }
+
+    /* Zone YouTube cachée sur mobile */
+    .youtube-player-sidebar {
+        display: none;
+    }
+
+    /* Éditeur principal */
+    .editor-wrapper {
+        padding: 1rem;
+    }
+    .article-subject {
+        font-size: 1.6rem;
+    }
+    .editor-area {
+        padding: 0.75rem;
+        font-size: 1rem;
+        min-height: 300px;
+    }
+
+    /* Boutons plus grands pour le toucher */
+    .toolbar-btn {
+        min-width: 38px;
+        height: 38px;
+        font-size: 15px;
+    }
+    .wp-button {
+        padding: 0.5rem 0.75rem;
+        height: 38px;
+    }
+    .toolbar-select {
+        min-width: 90px;
+        font-size: 12px;
+    }
+
+    /* Footer */
+    .footer-nav {
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+}

@@ -153,6 +153,7 @@
                 </div>
             </div>
             <div class="top-bar-actions">
+                <button class="wp-button sidebar-toggle-btn" id="sidebarToggleBtn" title="Afficher/masquer les articles">Articles</button>
                 <button class="wp-button" id="loadBtn">Charger</button>
                 <button class="wp-button danger" id="clearBtn">Effacer</button>
                 <button class="wp-button primary" id="saveBtn">Publier</button>
@@ -237,5 +238,12 @@
 
     <script src="publication.js"></script>
     <script src="pwa.js"></script>
+    <script>
+        // Toggle sidebar sur mobile
+        document.getElementById('sidebarToggleBtn').addEventListener('click', function() {
+            var sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
+        });
+    </script>
 </body>
 </html>
