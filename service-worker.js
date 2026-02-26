@@ -1,10 +1,13 @@
-const CACHE_NAME = 'scribouillart-editor-v1';
+const CACHE_NAME = 'scribouillart-editor-v2';
 
 const APP_SHELL = [
   './',
+  './index.html',
   './tirages.html',
   './style.css',
   './publication.js',
+  './pwa.js',
+  './service-worker.js',
   './manifest.webmanifest',
   './assets/icons/icon-192.png',
   './assets/icons/icon-512.png'
@@ -41,6 +44,26 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
 
   const url = new URL(request.url);
+
+  // Navigation (HTML): network-first for faster updates, fallback to cache when offline
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      (async () => {
+        try {
+          const response = await fetch(request);
+          const cache = await caches.open(CACHE_NAME);
+          cache.put(request, response.clone());
+          return response;
+        } catch (err) {
+          const cached = await caches.match(request);
+          if (cached) return cached;
+          const fallback = await caches.match('./tirages.html');
+          return fallback || new Response('Offline', { status: 503, statusText: 'Offline' });
+        }
+      })()
+    );
+    return;
+  }
 
   // App shell: cache-first
   if (url.origin === self.location.origin) {

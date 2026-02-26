@@ -39,7 +39,6 @@ html, body {
    VARIABLES CSS POUR L'ÉDITEUR
    ======================================== */
 :root {
-    /* Éditeur mode clair */
     --editor-bg-primary: #f0f0f1;
     --editor-bg-secondary: #fff;
     --editor-bg-tertiary: #f6f7f7;
@@ -222,84 +221,6 @@ body.editor-page .main {
     margin-top: 1rem;
     color: #ccc;
     font-size: 0.85rem;
-}
-
-/* ========================================
-   MENU FLOTTANT
-   ======================================== */
-.floating-social {
-    position: fixed;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    padding: 4px;
-    background: #3a3944;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    overflow: visible;
-}
-
-.floating-social-button {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #2f2e3a;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    text-decoration: none;
-}
-
-.floating-social-button.header-scroll-button {
-    background: #4a4956;
-    border-radius: 8px 8px 0 0;
-}
-
-.floating-social-button.header-scroll-button:hover {
-    filter: brightness(1.2);
-}
-
-.floating-social-button.rss-button {
-    background: #2f2e3a;
-    border-radius: 8px;
-    margin: 4px 0;
-}
-
-.floating-social-button.rss-button:hover {
-    filter: brightness(1.2);
-}
-
-.floating-social-button.home-button {
-    background: #f2efe6;
-    border-radius: 8px;
-    padding: 2px;
-}
-
-.floating-social-button.home-button:hover {
-    filter: brightness(1.1);
-    transform: scale(1.05);
-}
-
-.floating-social-button.home-button img {
-    width: 80px;
-    height: 80px;
-    object-fit: contain;
-}
-
-.floating-social-button.footer-scroll-button {
-    background: #4a4956;
-    border-radius: 0 0 8px 8px;
-}
-
-.floating-social-button.footer-scroll-button:hover {
-    filter: brightness(1.2);
 }
 
 /* Dark mode toggle button */
