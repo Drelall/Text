@@ -249,7 +249,7 @@ body.editor-page .main {
     border-bottom: 1px solid var(--editor-border-color);
     padding: 0.5rem 1.5rem;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
     position: sticky;
     top: 0;
@@ -278,6 +278,17 @@ body.editor-page .main {
     border: none;
     padding: 0;
     margin: 0;
+}
+
+/* Toolbar repositionnée dans l'éditeur */
+.editor-toolbar {
+    background: var(--editor-bg-tertiary);
+    border: 1px solid var(--editor-border-color);
+    border-radius: 4px 4px 0 0;
+    padding: 0.4rem 0.5rem;
+    flex-wrap: wrap;
+    gap: 2px;
+    margin-bottom: 0;
 }
 
 .toolbar-btn {
@@ -520,7 +531,8 @@ body.editor-page .main {
     background: var(--editor-bg-secondary);
     color: var(--editor-text-primary);
     border: 1px solid var(--editor-border-color);
-    border-radius: 2px;
+    border-top: none;
+    border-radius: 0 0 2px 2px;
     font-family: Georgia, 'Times New Roman', serif;
     font-size: 1.125rem;
     line-height: 1.8;
@@ -671,22 +683,19 @@ body.editor-page .main {
 
     /* Top bar */
     .top-bar {
-        flex-direction: column;
-        align-items: stretch;
         padding: 0.4rem 0.75rem;
-        gap: 0.4rem;
-    }
-    .top-bar-left {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-    .toolbar {
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        padding-bottom: 2px;
+        justify-content: flex-end;
     }
     .top-bar-actions {
         justify-content: flex-end;
+    }
+
+    /* Toolbar dans l'éditeur */
+    .editor-toolbar {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 4px 4px 0 0;
     }
 
     /* Bouton toggle sidebar visible */
