@@ -1,0 +1,25 @@
+{
+  "name": "Le Scribouill'art — Éditeur d'articles",
+  "short_name": "Scribouill'art",
+  "description": "Éditeur d'articles en local.",
+  "lang": "fr",
+  "start_url": "./tirages.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#2f2e3a",
+  "theme_color": "#2f2e3a",
+  "icons": [
+    {
+      "src": "./assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
