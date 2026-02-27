@@ -49,15 +49,28 @@
                     <button class="youtube-toggle" id="youtubeToggle" title="Réduire/Agrandir">−</button>
                 </div>
                 <div class="top-bar-youtube-content" id="youtubeContent">
-                    <iframe
-                        id="youtubeIframe"
-                        width="280"
-                        height="158"
-                        src="https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=0"
-                        frameborder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowfullscreen>
-                    </iframe>
+                    <!-- Conteneur caché pour l'API YouTube -->
+                    <div id="ytApiContainer" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;"></div>
+                    <!-- Lecteur custom style SoundCloud -->
+                    <div class="sc-player" id="scPlayer">
+                        <button class="sc-play-btn" id="scPlayBtn" title="Lecture / Pause" aria-label="Lecture / Pause">
+                            <svg class="sc-icon-play" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M8 5v14l11-7z"/></svg>
+                            <svg class="sc-icon-pause" viewBox="0 0 24 24" fill="currentColor" width="20" height="20" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                        </button>
+                        <div class="sc-info">
+                            <span class="sc-title">Lofi Hip Hop Radio</span>
+                            <div class="sc-wave">
+                                <span class="sc-live-badge">● LIVE</span>
+                                <div class="sc-bars" id="scBars">
+                                    <span></span><span></span><span></span><span></span><span></span><span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="sc-right">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14" style="flex-shrink:0;opacity:0.6"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                            <input type="range" class="sc-volume" id="scVolume" min="0" max="100" value="80" title="Volume">
+                        </div>
+                    </div>
                 </div>
             </div>
             <!-- Boutons d'action -->
@@ -174,6 +187,39 @@
 
     <script src="publication.js"></script>
     <script src="pwa.js"></script>
+    <!-- YouTube IFrame Player API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        var ytPlayer;
+        function onYouTubeIframeAPIReady() {
+            ytPlayer = new YT.Player('ytApiContainer', {
+                height: '1',
+                width: '1',
+                videoId: 'jfKfPfyJRdk',
+                playerVars: { autoplay: 0, controls: 0 },
+                events: {
+                    onStateChange: function(e) {
+                        var playing = e.data === YT.PlayerState.PLAYING;
+                        document.querySelector('.sc-icon-play').style.display = playing ? 'none' : 'block';
+                        document.querySelector('.sc-icon-pause').style.display = playing ? 'block' : 'none';
+                        document.getElementById('scBars').classList.toggle('playing', playing);
+                    }
+                }
+            });
+        }
+        document.getElementById('scPlayBtn').addEventListener('click', function() {
+            if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') return;
+            var state = ytPlayer.getPlayerState();
+            if (state === YT.PlayerState.PLAYING) {
+                ytPlayer.pauseVideo();
+            } else {
+                ytPlayer.playVideo();
+            }
+        });
+        document.getElementById('scVolume').addEventListener('input', function() {
+            if (ytPlayer && typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(parseInt(this.value));
+        });
+    </script>
     <script>
         // Toggle sidebar sur mobile
         document.getElementById('sidebarToggleBtn').addEventListener('click', function() {
