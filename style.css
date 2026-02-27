@@ -690,20 +690,21 @@ body.editor-page .main {
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
-    gap: 10px;
-    background: var(--editor-bg-secondary);
-    border: 1px solid var(--editor-border-color);
-    border-radius: 8px;
-    padding: 8px 12px;
-    width: 280px;
-    min-width: 280px;
+    gap: 12px;
+    background: linear-gradient(135deg, #181818, #101010);
+    border: 1px solid #2b2b2b;
+    border-radius: 999px;
+    padding: 6px 14px;
+    width: 320px;
+    min-width: 320px;
     box-sizing: border-box;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
 }
 
 .sc-play-btn {
     flex-shrink: 0;
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     border: none;
     background: #ff5500;
@@ -712,23 +713,30 @@ body.editor-page .main {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s, transform 0.1s;
+    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 }
-.sc-play-btn:hover { background: #e04a00; transform: scale(1.08); }
-.sc-play-btn:active { transform: scale(0.95); }
+.sc-play-btn:hover {
+    background: #ff6a1a;
+    transform: scale(1.06);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.55);
+}
+.sc-play-btn:active {
+    transform: scale(0.95);
+}
 
 .sc-info {
     flex: 1;
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
 }
 
 .sc-title {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
-    color: var(--editor-text-primary);
+    color: #ffffff;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -746,38 +754,41 @@ body.editor-page .main {
     color: #ff5500;
     letter-spacing: 0.5px;
     flex-shrink: 0;
+    text-transform: uppercase;
 }
 
-/* Barres d'animation waveform */
+/* Barres d'animation waveform façon SoundCloud */
 .sc-bars {
+    flex: 1;
     display: flex;
     align-items: flex-end;
     gap: 2px;
-    height: 14px;
+    height: 16px;
+    padding: 2px 0;
 }
 .sc-bars span {
     display: inline-block;
-    width: 3px;
+    flex: 1;
     border-radius: 2px;
-    background: var(--editor-text-secondary);
-    opacity: 0.4;
-    height: 4px;
-    transition: height 0.2s;
+    background: linear-gradient(to top, rgba(255, 85, 0, 0.9), rgba(255, 145, 77, 0.3));
+    opacity: 0.25;
+    height: 5px;
+    transition: height 0.25s ease-out, opacity 0.25s ease-out;
 }
 .sc-bars.playing span {
-    opacity: 0.8;
-    animation: sc-bounce 0.8s ease-in-out infinite;
+    opacity: 0.9;
+    animation: sc-bounce 0.9s ease-in-out infinite;
 }
-.sc-bars.playing span:nth-child(1) { animation-delay: 0s;    animation-duration: 0.7s; }
-.sc-bars.playing span:nth-child(2) { animation-delay: 0.1s;  animation-duration: 0.9s; }
-.sc-bars.playing span:nth-child(3) { animation-delay: 0.2s;  animation-duration: 0.6s; }
-.sc-bars.playing span:nth-child(4) { animation-delay: 0.05s; animation-duration: 1.0s; }
-.sc-bars.playing span:nth-child(5) { animation-delay: 0.15s; animation-duration: 0.75s; }
-.sc-bars.playing span:nth-child(6) { animation-delay: 0.25s; animation-duration: 0.85s; }
+.sc-bars.playing span:nth-child(1) { animation-delay: 0s;    animation-duration: 0.75s; }
+.sc-bars.playing span:nth-child(2) { animation-delay: 0.08s;  animation-duration: 0.95s; }
+.sc-bars.playing span:nth-child(3) { animation-delay: 0.16s;  animation-duration: 0.7s; }
+.sc-bars.playing span:nth-child(4) { animation-delay: 0.04s; animation-duration: 1.05s; }
+.sc-bars.playing span:nth-child(5) { animation-delay: 0.12s; animation-duration: 0.8s; }
+.sc-bars.playing span:nth-child(6) { animation-delay: 0.2s;  animation-duration: 0.9s; }
 
 @keyframes sc-bounce {
-    0%, 100% { height: 3px; }
-    50%       { height: 12px; }
+    0%, 100% { height: 4px; }
+    50%       { height: 16px; }
 }
 
 /* Volume */
@@ -791,10 +802,10 @@ body.editor-page .main {
 .sc-volume {
     -webkit-appearance: none;
     appearance: none;
-    width: 50px;
+    width: 60px;
     height: 3px;
-    border-radius: 2px;
-    background: var(--editor-border-color);
+    border-radius: 999px;
+    background: #2b2b2b;
     outline: none;
     cursor: pointer;
 }
@@ -804,6 +815,7 @@ body.editor-page .main {
     height: 10px;
     border-radius: 50%;
     background: #ff5500;
+    box-shadow: 0 0 0 2px #111;
     cursor: pointer;
 }
 .sc-volume::-moz-range-thumb {
@@ -811,8 +823,8 @@ body.editor-page .main {
     height: 10px;
     border-radius: 50%;
     background: #ff5500;
+    border: 2px solid #111;
     cursor: pointer;
-    border: none;
 }
 
 .color-input {
