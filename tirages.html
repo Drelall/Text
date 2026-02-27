@@ -190,6 +190,13 @@
     <!-- YouTube IFrame Player API -->
     <script src="https://www.youtube.com/iframe_api"></script>
     <script>
+        // Toggle sidebar sur mobile
+        document.getElementById('sidebarToggleBtn').addEventListener('click', function() {
+            var sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
+        });
+
+        // Lecteur YouTube caché (contrôlé via le lecteur custom SoundCloud)
         var ytPlayer;
         function onYouTubeIframeAPIReady() {
             ytPlayer = new YT.Player('ytApiContainer', {
@@ -218,13 +225,6 @@
         });
         document.getElementById('scVolume').addEventListener('input', function() {
             if (ytPlayer && typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(parseInt(this.value));
-        });
-    </script>
-    <script>
-        // Toggle sidebar sur mobile
-        document.getElementById('sidebarToggleBtn').addEventListener('click', function() {
-            var sidebar = document.querySelector('.sidebar');
-            sidebar.classList.toggle('open');
         });
     </script>
 </body>

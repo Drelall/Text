@@ -687,6 +687,8 @@ body.editor-page .main {
 /* ── Lecteur audio custom style SoundCloud ── */
 .sc-player {
     display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
     align-items: center;
     gap: 10px;
     background: var(--editor-bg-secondary);
@@ -694,6 +696,7 @@ body.editor-page .main {
     border-radius: 8px;
     padding: 8px 12px;
     width: 280px;
+    min-width: 280px;
     box-sizing: border-box;
 }
 
