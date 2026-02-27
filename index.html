@@ -53,9 +53,15 @@
                     <div id="ytApiContainer" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;"></div>
                     <!-- Lecteur custom style SoundCloud -->
                     <div class="sc-player" id="scPlayer">
+                        <button class="sc-skip-btn" id="scPrevBtn" title="Piste précédente" aria-label="Piste précédente">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M6 6h2v12H6V6zm3.5 6l8.5 6V6l-8.5 6z"/></svg>
+                        </button>
                         <button class="sc-play-btn" id="scPlayBtn" title="Lecture / Pause" aria-label="Lecture / Pause">
                             <svg class="sc-icon-play" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M8 5v14l11-7z"/></svg>
                             <svg class="sc-icon-pause" viewBox="0 0 24 24" fill="currentColor" width="20" height="20" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                        </button>
+                        <button class="sc-skip-btn" id="scNextBtn" title="Piste suivante" aria-label="Piste suivante">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M16 6h2v12h-2V6zm-8.5 6l8.5 6V6l-8.5 6z"/></svg>
                         </button>
                         <div class="sc-info">
                             <span class="sc-title">Lofi Hip Hop Radio</span>
@@ -198,6 +204,18 @@
 
         // Lecteur YouTube caché, contrôlé par le player custom
         var ytPlayer = null;
+        var currentTrackIndex = 0;
+        var pendingPlay = false; // si l'utilisateur clique Play avant que YouTube soit prêt
+        var tracks = [
+            {
+                id: 'XSXEaikz0Bc',
+                title: 'Lofi Hip Hop Radio'
+            },
+            {
+                id: 'blAFxjhg62k',
+                title: 'Seconde chaîne YouTube'
+            }
+        ];
 
         function updateMusicUI(playing) {
             var iconPlay = document.querySelector('.sc-icon-play');
@@ -212,6 +230,20 @@
             }
         }
 
+        function loadCurrentTrack(autoplay) {
+            if (!ytPlayer || typeof ytPlayer.loadVideoById !== 'function') return;
+            var track = tracks[currentTrackIndex];
+            if (!track) return;
+            ytPlayer.loadVideoById({ videoId: track.id, startSeconds: 0 });
+            if (!autoplay) {
+                ytPlayer.pauseVideo();
+            }
+            var titleEl = document.querySelector('.sc-title');
+            if (titleEl) {
+                titleEl.textContent = track.title;
+            }
+        }
+
         function onYouTubeIframeAPIReady() {
             var container = document.getElementById('ytApiContainer');
             if (!container) return;
@@ -219,13 +251,20 @@
             ytPlayer = new YT.Player('ytApiContainer', {
                 height: '1',
                 width: '1',
-                videoId: 'XSXEaikz0Bc',
+                videoId: tracks[0].id,
                 playerVars: { autoplay: 0, controls: 0 },
                 events: {
                     onReady: function (e) {
                         var volumeInput = document.getElementById('scVolume');
                         if (volumeInput && typeof e.target.setVolume === 'function') {
                             e.target.setVolume(parseInt(volumeInput.value, 10) || 80);
+                        }
+                        // Charge la piste courante et lance la lecture si un clic Play a déjà eu lieu
+                        loadCurrentTrack(false);
+                        if (pendingPlay) {
+                            ytPlayer.playVideo();
+                            updateMusicUI(true);
+                            pendingPlay = false;
                         }
                     },
                     onStateChange: function (e) {
@@ -238,13 +277,18 @@
 
         (function initCustomMusicControls() {
             var playBtn = document.getElementById('scPlayBtn');
+            var prevBtn = document.getElementById('scPrevBtn');
+            var nextBtn = document.getElementById('scNextBtn');
             var volumeInput = document.getElementById('scVolume');
 
             if (!playBtn) return;
 
             playBtn.addEventListener('click', function () {
                 if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') {
-                    return; // API pas prête encore
+                    // API pas encore prête : on mémorise l'intention de lecture
+                    pendingPlay = true;
+                    updateMusicUI(true);
+                    return;
                 }
                 var state = ytPlayer.getPlayerState();
                 if (state === YT.PlayerState.PLAYING || state === YT.PlayerState.BUFFERING) {
@@ -262,6 +306,29 @@
                     if (ytPlayer && typeof ytPlayer.setVolume === 'function' && !isNaN(value)) {
                         ytPlayer.setVolume(value);
                     }
+                });
+            }
+
+            function changeTrack(direction) {
+                if (!ytPlayer) return;
+                var count = tracks.length;
+                if (!count) return;
+                currentTrackIndex = (currentTrackIndex + direction + count) % count;
+                loadCurrentTrack(true);
+                updateMusicUI(true);
+            }
+
+            if (prevBtn) {
+                prevBtn.addEventListener('click', function () {
+                    if (!ytPlayer) return;
+                    changeTrack(-1);
+                });
+            }
+
+            if (nextBtn) {
+                nextBtn.addEventListener('click', function () {
+                    if (!ytPlayer) return;
+                    changeTrack(1);
                 });
             }
         })();
