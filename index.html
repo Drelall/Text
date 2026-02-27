@@ -187,6 +187,8 @@
 
     <script src="publication.js"></script>
     <script src="pwa.js"></script>
+    <!-- API IFrame YouTube pour piloter volume + lecture -->
+    <script src="https://www.youtube.com/iframe_api"></script>
     <script>
         // Toggle sidebar sur mobile
         document.getElementById('sidebarToggleBtn').addEventListener('click', function() {
@@ -194,55 +196,74 @@
             sidebar.classList.toggle('open');
         });
 
-        // Lecteur YouTube simplifié : on crée un iframe caché au clic sur Play
-        (function initSimpleYouTubePlayer() {
-            var playBtn = document.getElementById('scPlayBtn');
-            var bars = document.getElementById('scBars');
+        // Lecteur YouTube caché, contrôlé par le player custom
+        var ytPlayer = null;
+
+        function updateMusicUI(playing) {
             var iconPlay = document.querySelector('.sc-icon-play');
             var iconPause = document.querySelector('.sc-icon-pause');
-            var container = document.getElementById('ytApiContainer');
-            var iframe = null;
-            var isPlaying = false;
-            var BASE_URL = 'https://www.youtube.com/embed/XSXEaikz0Bc?controls=0&rel=0';
-
-            if (!playBtn || !container) return;
-
-            function updateUI(playing) {
-                if (iconPlay && iconPause) {
-                    iconPlay.style.display = playing ? 'none' : 'block';
-                    iconPause.style.display = playing ? 'block' : 'none';
-                }
-                if (bars) {
-                    bars.classList.toggle('playing', playing);
-                }
+            var bars = document.getElementById('scBars');
+            if (iconPlay && iconPause) {
+                iconPlay.style.display = playing ? 'none' : 'block';
+                iconPause.style.display = playing ? 'block' : 'none';
             }
+            if (bars) {
+                bars.classList.toggle('playing', playing);
+            }
+        }
 
-            playBtn.addEventListener('click', function () {
-                if (!isPlaying) {
-                    if (!iframe) {
-                        iframe = document.createElement('iframe');
-                        iframe.width = '1';
-                        iframe.height = '1';
-                        iframe.style.position = 'absolute';
-                        iframe.style.left = '0';
-                        iframe.style.top = '0';
-                        iframe.style.opacity = '0';
-                        iframe.style.pointerEvents = 'none';
-                        iframe.allow = 'autoplay';
-                        container.appendChild(iframe);
+        function onYouTubeIframeAPIReady() {
+            var container = document.getElementById('ytApiContainer');
+            if (!container) return;
+
+            ytPlayer = new YT.Player('ytApiContainer', {
+                height: '1',
+                width: '1',
+                videoId: 'XSXEaikz0Bc',
+                playerVars: { autoplay: 0, controls: 0 },
+                events: {
+                    onReady: function (e) {
+                        var volumeInput = document.getElementById('scVolume');
+                        if (volumeInput && typeof e.target.setVolume === 'function') {
+                            e.target.setVolume(parseInt(volumeInput.value, 10) || 80);
+                        }
+                    },
+                    onStateChange: function (e) {
+                        var playing = e.data === YT.PlayerState.PLAYING;
+                        updateMusicUI(playing);
                     }
-                    iframe.src = BASE_URL + '&autoplay=1';
-                    isPlaying = true;
-                    updateUI(true);
-                } else {
-                    if (iframe) {
-                        // Vider la source coupe la lecture
-                        iframe.src = '';
-                    }
-                    isPlaying = false;
-                    updateUI(false);
                 }
             });
+        }
+
+        (function initCustomMusicControls() {
+            var playBtn = document.getElementById('scPlayBtn');
+            var volumeInput = document.getElementById('scVolume');
+
+            if (!playBtn) return;
+
+            playBtn.addEventListener('click', function () {
+                if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') {
+                    return; // API pas prête encore
+                }
+                var state = ytPlayer.getPlayerState();
+                if (state === YT.PlayerState.PLAYING || state === YT.PlayerState.BUFFERING) {
+                    ytPlayer.pauseVideo();
+                    updateMusicUI(false);
+                } else {
+                    ytPlayer.playVideo();
+                    updateMusicUI(true);
+                }
+            });
+
+            if (volumeInput) {
+                volumeInput.addEventListener('input', function () {
+                    var value = parseInt(this.value, 10);
+                    if (ytPlayer && typeof ytPlayer.setVolume === 'function' && !isNaN(value)) {
+                        ytPlayer.setVolume(value);
+                    }
+                });
+            }
         })();
     </script>
 </body>
