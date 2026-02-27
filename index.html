@@ -187,8 +187,6 @@
 
     <script src="publication.js"></script>
     <script src="pwa.js"></script>
-    <!-- YouTube IFrame Player API -->
-    <script src="https://www.youtube.com/iframe_api"></script>
     <script>
         // Toggle sidebar sur mobile
         document.getElementById('sidebarToggleBtn').addEventListener('click', function() {
@@ -196,36 +194,56 @@
             sidebar.classList.toggle('open');
         });
 
-        // Lecteur YouTube caché (contrôlé via le lecteur custom SoundCloud)
-        var ytPlayer;
-        function onYouTubeIframeAPIReady() {
-            ytPlayer = new YT.Player('ytApiContainer', {
-                height: '1',
-                width: '1',
-                videoId: 'jfKfPfyJRdk',
-                playerVars: { autoplay: 0, controls: 0 },
-                events: {
-                    onStateChange: function(e) {
-                        var playing = e.data === YT.PlayerState.PLAYING;
-                        document.querySelector('.sc-icon-play').style.display = playing ? 'none' : 'block';
-                        document.querySelector('.sc-icon-pause').style.display = playing ? 'block' : 'none';
-                        document.getElementById('scBars').classList.toggle('playing', playing);
+        // Lecteur YouTube simplifié : on crée un iframe caché au clic sur Play
+        (function initSimpleYouTubePlayer() {
+            var playBtn = document.getElementById('scPlayBtn');
+            var bars = document.getElementById('scBars');
+            var iconPlay = document.querySelector('.sc-icon-play');
+            var iconPause = document.querySelector('.sc-icon-pause');
+            var container = document.getElementById('ytApiContainer');
+            var iframe = null;
+            var isPlaying = false;
+            var BASE_URL = 'https://www.youtube.com/embed/XSXEaikz0Bc?controls=0&rel=0';
+
+            if (!playBtn || !container) return;
+
+            function updateUI(playing) {
+                if (iconPlay && iconPause) {
+                    iconPlay.style.display = playing ? 'none' : 'block';
+                    iconPause.style.display = playing ? 'block' : 'none';
+                }
+                if (bars) {
+                    bars.classList.toggle('playing', playing);
+                }
+            }
+
+            playBtn.addEventListener('click', function () {
+                if (!isPlaying) {
+                    if (!iframe) {
+                        iframe = document.createElement('iframe');
+                        iframe.width = '1';
+                        iframe.height = '1';
+                        iframe.style.position = 'absolute';
+                        iframe.style.left = '0';
+                        iframe.style.top = '0';
+                        iframe.style.opacity = '0';
+                        iframe.style.pointerEvents = 'none';
+                        iframe.allow = 'autoplay';
+                        container.appendChild(iframe);
                     }
+                    iframe.src = BASE_URL + '&autoplay=1';
+                    isPlaying = true;
+                    updateUI(true);
+                } else {
+                    if (iframe) {
+                        // Vider la source coupe la lecture
+                        iframe.src = '';
+                    }
+                    isPlaying = false;
+                    updateUI(false);
                 }
             });
-        }
-        document.getElementById('scPlayBtn').addEventListener('click', function() {
-            if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') return;
-            var state = ytPlayer.getPlayerState();
-            if (state === YT.PlayerState.PLAYING) {
-                ytPlayer.pauseVideo();
-            } else {
-                ytPlayer.playVideo();
-            }
-        });
-        document.getElementById('scVolume').addEventListener('input', function() {
-            if (ytPlayer && typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(parseInt(this.value));
-        });
+        })();
     </script>
 </body>
 </html>

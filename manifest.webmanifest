@@ -3,7 +3,7 @@
   "short_name": "Scribouill'art",
   "description": "Éditeur d'articles en local.",
   "lang": "fr",
-  "start_url": "./tirages.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#2f2e3a",

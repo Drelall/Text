@@ -5,10 +5,10 @@ Ce dossier contient une PWA (Progressive Web App) installable (Windows / Android
 ## Utiliser en local (Windows)
 
 1. Double-clique sur `serve.bat`
-2. Ouvre **http://localhost:5173/tirages.html** dans Edge/Chrome
+2. Ouvre **http://localhost:5173/index.html** dans Edge/Chrome
 3. Installe l’app : menu ⋯ → **Installer cette application** (ou icône d’installation dans la barre d’adresse)
 
-> Remarque : la PWA ne s’installe pas correctement en double-cliquant directement `tirages.html` (mode `file://`).
+> Remarque : la PWA ne s’installe pas correctement en double-cliquant directement `index.html` (mode `file://`).
 
 ## Offline
 
@@ -29,18 +29,18 @@ Ce dossier contient une PWA (Progressive Web App) installable (Windows / Android
 	 - **Build and deployment** : “Deploy from a branch”
 	 - **Branch** : `main` + `/ (root)`
 4. Attends 1–2 minutes, puis ouvre l’URL fournie par GitHub Pages
-5. Ouvre directement `.../tirages.html` puis installe l’app (Chrome/Edge)
+5. Ouvre directement `.../index.html` puis installe l’app (Chrome/Edge)
 
 Notes importantes :
 - Sur GitHub Pages, l’URL ressemble souvent à `https://<user>.github.io/<repo>/...`.
 	Les chemins relatifs (ce projet utilise `./`) sont adaptés.
 - Si tu laisses des liens/images vers `../index.html` ou `../images/...`, ils seront **cassés**
 	si ces fichiers ne sont pas présents dans le dépôt. Soit tu ajoutes ces dossiers/fichiers,
-	soit tu enlèves/ajustes ces liens dans `tirages.html`.
+	soit tu enlèves/ajustes ces liens dans `index.html`.
 
 ### Option B : zip + serveur local
 - Zippe le dossier
-- Tes amis dézippent et lancent `serve.bat`, puis installent depuis `http://localhost:5173/tirages.html`
+- Tes amis dézippent et lancent `serve.bat`, puis installent depuis `http://localhost:5173/index.html`
 
 ## Vérifier que la PWA est OK
 

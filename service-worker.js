@@ -3,7 +3,6 @@ const CACHE_NAME = 'scribouillart-editor-v3';
 const APP_SHELL = [
   './',
   './index.html',
-  './tirages.html',
   './style.css',
   './publication.js',
   './pwa.js',
@@ -57,7 +56,7 @@ self.addEventListener('fetch', (event) => {
         } catch (err) {
           const cached = await caches.match(request);
           if (cached) return cached;
-          const fallback = await caches.match('./tirages.html');
+          const fallback = await caches.match('./index.html');
           return fallback || new Response('Offline', { status: 503, statusText: 'Offline' });
         }
       })()
@@ -79,7 +78,7 @@ self.addEventListener('fetch', (event) => {
           return response;
         } catch (err) {
           // Offline fallback
-          const fallback = await caches.match('./tirages.html');
+          const fallback = await caches.match('./index.html');
           return fallback || new Response('Offline', { status: 503, statusText: 'Offline' });
         }
       })()

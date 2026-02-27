@@ -32,6 +32,11 @@ function initEditor() {
     const bgColor = document.getElementById('bgColor');
     const youtubeToggle = document.getElementById('youtubeToggle');
     const youtubeContent = document.getElementById('youtubeContent');
+    // Ancien système de conversion / sortie (peut être absent du DOM)
+    const convertBtn = document.getElementById('convertBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const output = document.getElementById('output');
+    const formatSelector = document.getElementById('formatSelector');
 
     let currentArticleId = null;
     let isSourceMode = false;
@@ -198,7 +203,9 @@ function initEditor() {
         if (confirm('Êtes-vous sûr de vouloir effacer tout le contenu ? Cette action est irréversible.')) {
             articleSubject.value = '';
             editor.innerHTML = '<p>Commencez à écrire ou tapez / pour choisir un bloc</p>';
-            output.textContent = '';
+            if (output) {
+                output.textContent = '';
+            }
             hasUnsavedChanges = false;
             markAsSaved();
             showStatus('✓ Contenu effacé !', 'success');
@@ -206,20 +213,23 @@ function initEditor() {
     });
 
     // Conversion
-    convertBtn.addEventListener('click', () => {
-        const format = formatSelector.value;
-        const content = editor.innerHTML;
+    if (convertBtn && formatSelector && output) {
+        convertBtn.addEventListener('click', () => {
+            const format = formatSelector.value;
+            const content = editor.innerHTML;
 
-        if (format === 'html') {
-            output.textContent = cleanHTML(content);
-        } else if (format === 'javascript') {
-            output.textContent = convertToJavaScript(content);
-        }
+            if (format === 'html') {
+                output.textContent = cleanHTML(content);
+            } else if (format === 'javascript') {
+                output.textContent = convertToJavaScript(content);
+            }
 
-        hideStatus();
-    });
+            hideStatus();
+        });
+    }
 
     // Copie dans le presse-papiers
+    if (copyBtn && output) {
     copyBtn.addEventListener('click', async () => {
         const text = output.textContent;
         
@@ -249,6 +259,7 @@ function initEditor() {
             document.body.removeChild(textarea);
         }
     });
+    }
 
     // Raccourcis clavier
     editor.addEventListener('keydown', (e) => {
