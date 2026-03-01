@@ -142,7 +142,7 @@ function initEditor() {
     editor.addEventListener('mouseup', updateToolbarState);
     editor.addEventListener('keyup', updateToolbarState);
 
-    // Bouton Publier
+    // Bouton Enregistrer
     saveBtn.addEventListener('click', () => {
         publishArticle();
     });
@@ -360,28 +360,59 @@ function initEditor() {
     }
 
     /**
-     * Publie l'article
+     * Affiche un dialogue de choix de format puis lance le téléchargement
      */
     function publishArticle() {
         const subject = articleSubject.value.trim();
-        const content = editor.innerHTML;
-        
+        const htmlContent = editor.innerHTML;
+        const plainText = editor.innerText;
+
         if (!subject) {
-            showStatus('⚠️ Veuillez saisir un objet pour l\'article', 'error');
+            showStatus('\u26a0\ufe0f Veuillez saisir un objet pour l\'article', 'error');
             return;
         }
-        
-        downloadTextFile(subject, content);
-        saveArticleToList(subject, content);
-        markAsSaved();
+
+        // Création du dialogue de choix
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center';
+
+        const modal = document.createElement('div');
+        modal.style.cssText = 'background:#1e1e1e;border:1px solid #444;border-radius:10px;padding:28px 32px;min-width:280px;text-align:center;color:#f1f1f1;font-family:inherit';
+        modal.innerHTML = `
+          <p style="margin:0 0 6px;font-size:13px;color:#aaa;">Choisir le format d'export</p>
+          <p style="margin:0 0 22px;font-size:16px;font-weight:600;">Enregistrer en :</p>
+          <div style="display:flex;gap:12px;justify-content:center;margin-bottom:16px">
+            <button id="_dlTxt" style="padding:10px 22px;border-radius:6px;border:1px solid #555;background:#2a2a2a;color:#f1f1f1;cursor:pointer;font-size:14px;">Texte brut (.txt)</button>
+            <button id="_dlDoc" style="padding:10px 22px;border-radius:6px;border:1px solid #555;background:#2a2a2a;color:#f1f1f1;cursor:pointer;font-size:14px;">Word (.doc)</button>
+          </div>
+          <button id="_dlCancel" style="background:none;border:none;color:#888;cursor:pointer;font-size:13px;">Annuler</button>`;
+
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        const close = () => document.body.removeChild(overlay);
+
+        modal.querySelector('#_dlTxt').addEventListener('click', () => {
+            close();
+            downloadTextFile(subject, plainText);
+            saveArticleToList(subject, htmlContent);
+            markAsSaved();
+        });
+        modal.querySelector('#_dlDoc').addEventListener('click', () => {
+            close();
+            downloadWordFile(subject, htmlContent);
+            saveArticleToList(subject, htmlContent);
+            markAsSaved();
+        });
+        modal.querySelector('#_dlCancel').addEventListener('click', close);
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
     }
 
     /**
-     * Télécharge le contenu en fichier TXT
+     * Télécharge le contenu en texte brut (.txt) — sans balises
      */
-    async function downloadTextFile(subject, htmlContent) {
+    async function downloadTextFile(subject, plainText) {
         const timestamp = new Date().toISOString().slice(0, 10);
-        
         const cleanSubject = subject
             .toLowerCase()
             .normalize('NFD')
@@ -390,148 +421,119 @@ function initEditor() {
             .replace(/^-+|-+$/g, '')
             .substring(0, 50);
         const filename = `${cleanSubject}-${timestamp}.txt`;
-        
-        const textContent = htmlToText(htmlContent);
-        
-        const fullContent = `TITRE: ${subject}
-DATE: ${new Date().toLocaleDateString('fr-FR')}
--------------------------------------------
+        const blob = new Blob([plainText], { type: 'text/plain;charset=utf-8' });
 
-${textContent}`;
-        
+        if ('showSaveFilePicker' in window) {
+            try {
+                const handle = await window.showSaveFilePicker({
+                    suggestedName: filename,
+                    types: [{ description: 'Fichier texte', accept: { 'text/plain': ['.txt'] } }]
+                });
+                const writable = await handle.createWritable();
+                await writable.write(blob);
+                await writable.close();
+                showStatus(`\u2713 Fichier "${filename}" enregistr\u00e9 avec succ\u00e8s !`, 'success');
+            } catch (err) {
+                if (err.name === 'AbortError') {
+                    showStatus('Sauvegarde annul\u00e9e', 'error');
+                } else {
+                    showStatus(`\u274c Erreur : ${err.message}`, 'error');
+                }
+            }
+        } else {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+            showStatus(`\u2713 Fichier t\u00e9l\u00e9charg\u00e9 dans T\u00e9l\u00e9chargements`, 'success');
+        }
+    }
+
+    /**
+     * Télécharge le contenu en fichier Word (.doc) — format Word HTML natif
+     */
+    async function downloadWordFile(subject, htmlContent) {
+        const timestamp = new Date().toISOString().slice(0, 10);
+
+        const cleanSubject = subject
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '')
+            .substring(0, 50);
+        const filename = `${cleanSubject}-${timestamp}.doc`;
+
+        // Format Word HTML : Word ouvre nativement ce format et conserve toute la mise en page
+        const wordHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office'
+          xmlns:w='urn:schemas-microsoft-com:office:word'
+          xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+  <meta charset='utf-8'>
+  <title>${subject}</title>
+  <!--[if gte mso 9]><xml>
+    <w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument>
+  </xml><![endif]-->
+  <style>
+    @page { margin: 2cm; }
+    body { font-family: Calibri, Arial, sans-serif; font-size: 12pt; line-height: 1.6; color: #1a1a1a; }
+    h1 { font-size: 22pt; font-weight: bold; color: #1a1a1a; margin-top: 18pt; margin-bottom: 6pt; }
+    h2 { font-size: 16pt; font-weight: bold; color: #1a1a1a; margin-top: 14pt; margin-bottom: 4pt; }
+    h3 { font-size: 13pt; font-weight: bold; color: #1a1a1a; margin-top: 10pt; margin-bottom: 2pt; }
+    p  { margin: 4pt 0 8pt 0; }
+    blockquote { margin-left: 30pt; border-left: 3pt solid #ccc; padding-left: 10pt; color: #555; }
+    ul, ol { margin-left: 18pt; padding-left: 6pt; }
+    li { margin-bottom: 3pt; }
+    strong, b { font-weight: bold; }
+    em, i { font-style: italic; }
+    u { text-decoration: underline; }
+    a { color: #0563C1; text-decoration: underline; }
+    table { border-collapse: collapse; width: 100%; }
+    td, th { border: 1pt solid #ccc; padding: 4pt 8pt; }
+  </style>
+</head>
+<body>
+${htmlContent}
+</body>
+</html>`;
+
+        const blob = new Blob(['\uFEFF', wordHtml], {
+            type: 'application/msword;charset=utf-8'
+        });
+
         if ('showSaveFilePicker' in window) {
             try {
                 const handle = await window.showSaveFilePicker({
                     suggestedName: filename,
                     types: [{
-                        description: 'Fichier texte',
-                        accept: { 'text/plain': ['.txt'] }
-                    }],
-                    excludeAcceptAllOption: false
+                        description: 'Document Word',
+                        accept: { 'application/msword': ['.doc'] }
+                    }]
                 });
-                
                 const writable = await handle.createWritable();
-                await writable.write(fullContent);
+                await writable.write(blob);
                 await writable.close();
                 showStatus(`✓ Fichier "${filename}" enregistré avec succès !`, 'success');
             } catch (err) {
-                // L'utilisateur a annulé ou une erreur s'est produite
                 if (err.name === 'AbortError') {
                     showStatus('Sauvegarde annulée', 'error');
                 } else {
-                    showStatus(`❌ Erreur: ${err.message}`, 'error');
+                    showStatus(`❌ Erreur : ${err.message}`, 'error');
                 }
             }
         } else {
-            alert('⚠️ Votre navigateur ne supporte pas le choix d\'emplacement.\n\nRecommandation :\n- Utilisez Chrome ou Edge (version récente)\n- Ou le fichier sera téléchargé dans votre dossier Téléchargements');
-            
-            const blob = new Blob([fullContent], { type: 'text/plain;charset=utf-8' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = filename;
-            
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            
             URL.revokeObjectURL(link.href);
-            
             showStatus(`✓ Fichier téléchargé dans Téléchargements`, 'success');
         }
-    }
-
-    /**
-     * Convertit le HTML en texte brut
-     */
-    function htmlToText(html) {
-        const temp = document.createElement('div');
-        temp.innerHTML = html;
-        
-        let text = '';
-        
-        function processNode(node) {
-            if (node.nodeType === Node.TEXT_NODE) {
-                text += node.textContent;
-            } else if (node.nodeType === Node.ELEMENT_NODE) {
-                const tagName = node.tagName.toLowerCase();
-                
-                switch(tagName) {
-                    case 'h1':
-                        text += '\n\n========== ';
-                        processChildren(node);
-                        text += ' ==========\n\n';
-                        break;
-                    case 'h2':
-                        text += '\n\n---------- ';
-                        processChildren(node);
-                        text += ' ----------\n\n';
-                        break;
-                    case 'h3':
-                        text += '\n\n### ';
-                        processChildren(node);
-                        text += ' ###\n\n';
-                        break;
-                    case 'p':
-                        text += '\n';
-                        processChildren(node);
-                        text += '\n';
-                        break;
-                    case 'br':
-                        text += '\n';
-                        break;
-                    case 'strong':
-                    case 'b':
-                        text += '**';
-                        processChildren(node);
-                        text += '**';
-                        break;
-                    case 'em':
-                    case 'i':
-                        text += '_';
-                        processChildren(node);
-                        text += '_';
-                        break;
-                    case 'a':
-                        processChildren(node);
-                        const href = node.getAttribute('href');
-                        if (href) {
-                            text += ` (${href})`;
-                        }
-                        break;
-                    case 'ul':
-                    case 'ol':
-                        text += '\n';
-                        processChildren(node);
-                        text += '\n';
-                        break;
-                    case 'li':
-                        text += '  • ';
-                        processChildren(node);
-                        text += '\n';
-                        break;
-                    case 'blockquote':
-                        text += '\n> ';
-                        processChildren(node);
-                        text += '\n';
-                        break;
-                    default:
-                        processChildren(node);
-                }
-            }
-        }
-        
-        function processChildren(node) {
-            for (let child of node.childNodes) {
-                processNode(child);
-            }
-        }
-        
-        processNode(temp);
-        
-        return text
-            .replace(/\n{3,}/g, '\n\n')
-            .replace(/[ \t]+/g, ' ')
-            .trim();
     }
 
     /**
