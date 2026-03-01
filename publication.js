@@ -902,3 +902,137 @@ export default articleContent;`;
             statusMessage.className = 'status-message';
         }
     }
+
+// ─── Sidebar toggle (mobile) ────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+    var sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+    if (sidebarToggleBtn) {
+        sidebarToggleBtn.addEventListener('click', function () {
+            var sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
+        });
+    }
+});
+
+// ─── Lecteur YouTube custom ──────────────────────────────────────────────────
+var ytPlayer = null;
+var currentTrackIndex = 0;
+var pendingPlay = false;
+var tracks = [
+    { id: 'XSXEaikz0Bc', title: 'Lofi Hip Hop Radio' },
+    { id: 'blAFxjhg62k', title: 'Seconde chaîne YouTube' }
+];
+
+function updateMusicUI(playing) {
+    var iconPlay = document.querySelector('.sc-icon-play');
+    var iconPause = document.querySelector('.sc-icon-pause');
+    var bars = document.getElementById('scBars');
+    if (iconPlay && iconPause) {
+        iconPlay.style.display = playing ? 'none' : 'block';
+        iconPause.style.display = playing ? 'block' : 'none';
+    }
+    if (bars) {
+        bars.classList.toggle('playing', playing);
+    }
+}
+
+function loadCurrentTrack(autoplay) {
+    if (!ytPlayer || typeof ytPlayer.loadVideoById !== 'function') return;
+    var track = tracks[currentTrackIndex];
+    if (!track) return;
+    ytPlayer.loadVideoById({ videoId: track.id, startSeconds: 0 });
+    if (!autoplay) {
+        ytPlayer.pauseVideo();
+    }
+    var titleEl = document.querySelector('.sc-title');
+    if (titleEl) {
+        titleEl.textContent = track.title;
+    }
+}
+
+function onYouTubeIframeAPIReady() {
+    var container = document.getElementById('ytApiContainer');
+    if (!container) return;
+
+    ytPlayer = new YT.Player('ytApiContainer', {
+        height: '1',
+        width: '1',
+        videoId: tracks[0].id,
+        playerVars: { autoplay: 0, controls: 0 },
+        events: {
+            onReady: function (e) {
+                var volumeInput = document.getElementById('scVolume');
+                if (volumeInput && typeof e.target.setVolume === 'function') {
+                    e.target.setVolume(parseInt(volumeInput.value, 10) || 80);
+                }
+                loadCurrentTrack(false);
+                if (pendingPlay) {
+                    ytPlayer.playVideo();
+                    updateMusicUI(true);
+                    pendingPlay = false;
+                }
+            },
+            onStateChange: function (e) {
+                var playing = e.data === YT.PlayerState.PLAYING;
+                updateMusicUI(playing);
+            }
+        }
+    });
+}
+
+(function initCustomMusicControls() {
+    var playBtn = document.getElementById('scPlayBtn');
+    var prevBtn = document.getElementById('scPrevBtn');
+    var nextBtn = document.getElementById('scNextBtn');
+    var volumeInput = document.getElementById('scVolume');
+
+    if (!playBtn) return;
+
+    playBtn.addEventListener('click', function () {
+        if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') {
+            pendingPlay = true;
+            updateMusicUI(true);
+            return;
+        }
+        var state = ytPlayer.getPlayerState();
+        if (state === YT.PlayerState.PLAYING || state === YT.PlayerState.BUFFERING) {
+            ytPlayer.pauseVideo();
+            updateMusicUI(false);
+        } else {
+            ytPlayer.playVideo();
+            updateMusicUI(true);
+        }
+    });
+
+    if (volumeInput) {
+        volumeInput.addEventListener('input', function () {
+            var value = parseInt(this.value, 10);
+            if (ytPlayer && typeof ytPlayer.setVolume === 'function' && !isNaN(value)) {
+                ytPlayer.setVolume(value);
+            }
+        });
+    }
+
+    function changeTrack(direction) {
+        if (!ytPlayer) return;
+        var count = tracks.length;
+        if (!count) return;
+        currentTrackIndex = (currentTrackIndex + direction + count) % count;
+        loadCurrentTrack(true);
+        updateMusicUI(true);
+    }
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', function () {
+            if (!ytPlayer) return;
+            changeTrack(-1);
+        });
+    }
+
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function () {
+            if (!ytPlayer) return;
+            changeTrack(1);
+        });
+    }
+})();
