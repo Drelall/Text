@@ -54,8 +54,9 @@
                     <!-- Lecteur custom style SoundCloud -->
                     <div class="sc-player" id="scPlayer">
                         <button class="sc-skip-btn" id="scPrevBtn" title="Piste précédente" aria-label="Piste précédente">
-                            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-                                <path d="M16 6L8 12l8 6V6z" fill="currentColor"/>
+                            <!-- Bouton précédent style SoundCloud : barre + triangle gauche -->
+                            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="currentColor">
+                                <path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/>
                             </svg>
                         </button>
                         <button class="sc-play-btn" id="scPlayBtn" title="Lecture / Pause" aria-label="Lecture / Pause">
@@ -63,8 +64,9 @@
                             <svg class="sc-icon-pause" viewBox="0 0 24 24" fill="currentColor" width="20" height="20" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                         </button>
                         <button class="sc-skip-btn" id="scNextBtn" title="Piste suivante" aria-label="Piste suivante">
-                            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-                                <path d="M8 6l8 6-8 6V6z" fill="currentColor"/>
+                            <!-- Bouton suivant style SoundCloud : triangle droit + barre -->
+                            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="currentColor">
+                                <path d="M6 18l8.5-6L6 6v12zm8.5-6v6H17V6h-2.5z"/>
                             </svg>
                         </button>
                         <div class="sc-info">
