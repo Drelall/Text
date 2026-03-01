@@ -1,10 +1,11 @@
-const CACHE_NAME = 'scribouillart-editor-v3';
+const CACHE_NAME = 'scribouillart-editor-v4';
 
 const APP_SHELL = [
   './',
   './index.html',
   './style.css',
   './publication.js',
+  './musique.js',
   './pwa.js',
   './service-worker.js',
   './manifest.webmanifest',
@@ -64,20 +65,19 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // App shell: cache-first
+  // App shell: network-first pour recevoir les mises à jour dès que possible
   if (url.origin === self.location.origin) {
     event.respondWith(
       (async () => {
-        const cached = await caches.match(request);
-        if (cached) return cached;
-
         try {
           const response = await fetch(request);
           const cache = await caches.open(CACHE_NAME);
           cache.put(request, response.clone());
           return response;
         } catch (err) {
-          // Offline fallback
+          // Hors ligne : fallback sur le cache
+          const cached = await caches.match(request);
+          if (cached) return cached;
           const fallback = await caches.match('./index.html');
           return fallback || new Response('Offline', { status: 503, statusText: 'Offline' });
         }
