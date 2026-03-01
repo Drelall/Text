@@ -495,7 +495,7 @@ body.editor-page .main {
 }
 
 .editor-wrapper {
-    max-width: 840px;
+    max-width: 100%;
     margin: 0 auto;
     padding: 2rem;
 }
