@@ -383,7 +383,7 @@ function initEditor() {
           <p style="margin:0 0 22px;font-size:16px;font-weight:600;">Enregistrer en :</p>
           <div style="display:flex;gap:12px;justify-content:center;margin-bottom:16px">
             <button id="_dlTxt" style="padding:10px 22px;border-radius:6px;border:1px solid #555;background:#2a2a2a;color:#f1f1f1;cursor:pointer;font-size:14px;">Texte brut (.txt)</button>
-            <button id=\"_dlDoc\" style=\"padding:10px 22px;border-radius:6px;border:1px solid #555;background:#2a2a2a;color:#f1f1f1;cursor:pointer;font-size:14px;\">Word (.rtf)</button>
+            <button id="_dlDoc" style="padding:10px 22px;border-radius:6px;border:1px solid #555;background:#2a2a2a;color:#f1f1f1;cursor:pointer;font-size:14px;">Word (.docx)</button>
           </div>
           <button id="_dlCancel" style="background:none;border:none;color:#888;cursor:pointer;font-size:13px;">Annuler</button>`;
 
@@ -453,9 +453,14 @@ function initEditor() {
     }
 
     /**
-     * Télécharge le contenu en fichier RTF — reconnu nativement par Word sans alerte
+     * Télécharge le contenu en vrai fichier .docx — icône Word immédiate, zéro alerte
      */
     async function downloadWordFile(subject, htmlContent) {
+        if (typeof htmlDocx === 'undefined') {
+            showStatus('❌ Export Word indisponible hors connexion.', 'error');
+            return;
+        }
+
         const timestamp = new Date().toISOString().slice(0, 10);
         const cleanSubject = subject
             .toLowerCase()
@@ -464,18 +469,27 @@ function initEditor() {
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/^-+|-+$/g, '')
             .substring(0, 50);
-        const filename = `${cleanSubject}-${timestamp}.rtf`;
+        const filename = `${cleanSubject}-${timestamp}.docx`;
 
-        const rtf = htmlToRtf(subject, htmlContent);
-        const blob = new Blob([rtf], { type: 'application/rtf;charset=ascii' });
+        const fullHtml = `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><style>
+  body{font-family:Calibri,Arial,sans-serif;font-size:12pt;line-height:1.6;}
+  h1{font-size:22pt;font-weight:bold;margin-top:24pt;}
+  h2{font-size:16pt;font-weight:bold;margin-top:18pt;}
+  h3{font-size:13pt;font-weight:bold;margin-top:14pt;}
+  p{margin:4pt 0 8pt;} blockquote{margin-left:30pt;padding-left:10pt;color:#555;}
+  ul,ol{margin-left:18pt;} strong,b{font-weight:bold;} em,i{font-style:italic;}
+  u{text-decoration:underline;} a{color:#0563C1;}
+</style></head><body>${htmlContent}</body></html>`;
+
+        const blob = htmlDocx.asBlob(fullHtml);
 
         if ('showSaveFilePicker' in window) {
             try {
                 const handle = await window.showSaveFilePicker({
                     suggestedName: filename,
                     types: [{
-                        description: 'Document Word / RTF',
-                        accept: { 'application/rtf': ['.rtf'] }
+                        description: 'Document Word',
+                        accept: { 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'] }
                     }]
                 });
                 const writable = await handle.createWritable();
@@ -499,108 +513,6 @@ function initEditor() {
             URL.revokeObjectURL(link.href);
             showStatus(`✓ Fichier téléchargé dans Téléchargements`, 'success');
         }
-    }
-
-    /**
-     * Convertit le HTML de l'éditeur en RTF — format natif Word (aucune library externe)
-     */
-    function htmlToRtf(subject, htmlContent) {
-        const temp = document.createElement('div');
-        temp.innerHTML = htmlContent;
-
-        // Table des couleurs (index 1-based)
-        const colors = ['000000', 'ffffff', '0563C1', '555555'];
-
-        function colorToHex(cssColor) {
-            if (!cssColor) return null;
-            if (cssColor.startsWith('#')) return cssColor.slice(1).toLowerCase();
-            const m = cssColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
-            if (m) return [m[1], m[2], m[3]].map(x => parseInt(x).toString(16).padStart(2, '0')).join('');
-            return null;
-        }
-        function getColorIdx(cssColor) {
-            const hex = colorToHex(cssColor);
-            if (!hex) return 1;
-            let idx = colors.indexOf(hex);
-            if (idx === -1) { colors.push(hex); idx = colors.length - 1; }
-            return idx + 1;
-        }
-
-        // Échappement RTF : backslash, accolades, et caractères non-ASCII → \uN?
-        function esc(text) {
-            let out = '';
-            for (const c of text) {
-                const code = c.charCodeAt(0);
-                if (c === '\\') out += '\\\\';
-                else if (c === '{') out += '\\{';
-                else if (c === '}') out += '\\}';
-                else if (code > 127) {
-                    const n = code > 32767 ? code - 65536 : code;
-                    out += `\\u${n}?`;
-                } else {
-                    out += c;
-                }
-            }
-            return out;
-        }
-
-        function processNode(node) {
-            if (node.nodeType === Node.TEXT_NODE) return esc(node.textContent);
-            if (node.nodeType !== Node.ELEMENT_NODE) return '';
-            const tag = node.tagName.toLowerCase();
-            const kids = Array.from(node.childNodes).map(processNode).join('');
-
-            switch (tag) {
-                case 'h1': return `\\pard\\sb240\\sa120\\b\\fs48 ${kids}\\b0\\fs24\\par\n`;
-                case 'h2': return `\\pard\\sb200\\sa80\\b\\fs36 ${kids}\\b0\\fs24\\par\n`;
-                case 'h3': return `\\pard\\sb160\\sa60\\b\\fs28 ${kids}\\b0\\fs24\\par\n`;
-                case 'p':  return `\\pard\\sb0\\sa120 ${kids}\\par\n`;
-                case 'br': return `\\line `;
-                case 'b': case 'strong': return `{\\b ${kids}}`;
-                case 'em': case 'i':    return `{\\i ${kids}}`;
-                case 'u':               return `{\\ul ${kids}}`;
-                case 'span': {
-                    let open = '', close = '';
-                    if (node.style.color) {
-                        open += `\\cf${getColorIdx(node.style.color)} `;
-                        close = `\\cf1 ` + close;
-                    }
-                    if (node.style.backgroundColor) {
-                        open += `\\highlight${getColorIdx(node.style.backgroundColor)} `;
-                        close = `\\highlight0 ` + close;
-                    }
-                    return `{${open}${kids}${close}}`;
-                }
-                case 'li': return `\\pard\\fi-360\\li720 \\bullet\\tab ${kids}\\par\n`;
-                case 'ul': case 'ol': return kids;
-                case 'blockquote': return `\\pard\\li720\\ri720\\sb60\\sa60\\cf4 ${kids}\\cf1\\par\n`;
-                case 'a': {
-                    const href = esc(node.getAttribute('href') || '');
-                    return `{\\field{\\*\\fldinst HYPERLINK "${href}"}{\\fldrslt\\ul\\cf3 ${kids}\\ul0}}`;
-                }
-                case 'div': return kids ? kids + '\\par\n' : '';
-                default: return kids;
-            }
-        }
-
-        const body = Array.from(temp.childNodes).map(processNode).join('');
-        const titleRtf = `\\pard\\sb0\\sa200\\b\\fs52 ${esc(subject)}\\b0\\fs24\\par\n`;
-
-        // Construction de la table des couleurs (après avoir parcouru le contenu)
-        const colorTable = '{\\colortbl ;' + colors.map(h => {
-            const r = parseInt(h.slice(0, 2), 16);
-            const g = parseInt(h.slice(2, 4), 16);
-            const b = parseInt(h.slice(4, 6), 16);
-            return `\\red${r}\\green${g}\\blue${b};`;
-        }).join('') + '}';
-
-        return `{\\rtf1\\ansi\\ansicpg1252\\deff0\n` +
-            `{\\fonttbl{\\f0\\froman\\fcharset0 Calibri;}}\n` +
-            `${colorTable}\n` +
-            `\\widowctrl\\hyphauto\\f0\\fs24\\cf1\n` +
-            titleRtf +
-            body +
-            `}`;
     }
 
     /**
