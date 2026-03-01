@@ -1,14 +1,3 @@
-// (Anciennement) restriction "local uniquement".
-// Pour une PWA / publication, on initialise l’éditeur quel que soit l’hôte.
-function isLocalHost() {
-    const hostname = window.location.hostname;
-    return hostname === 'localhost' ||
-           hostname === '127.0.0.1' ||
-           hostname === '' ||
-           hostname.startsWith('192.168.') ||
-           hostname.startsWith('10.') ||
-           hostname.endsWith('.local');
-}
 
 // Initialiser l'éditeur
 initEditor();
@@ -32,11 +21,6 @@ function initEditor() {
     const bgColor = document.getElementById('bgColor');
     const youtubeToggle = document.getElementById('youtubeToggle');
     const youtubeContent = document.getElementById('youtubeContent');
-    // Ancien système de conversion / sortie (peut être absent du DOM)
-    const convertBtn = document.getElementById('convertBtn');
-    const copyBtn = document.getElementById('copyBtn');
-    const output = document.getElementById('output');
-    const formatSelector = document.getElementById('formatSelector');
 
     let currentArticleId = null;
     let isSourceMode = false;
@@ -212,55 +196,6 @@ function initEditor() {
         }
     });
 
-    // Conversion
-    if (convertBtn && formatSelector && output) {
-        convertBtn.addEventListener('click', () => {
-            const format = formatSelector.value;
-            const content = editor.innerHTML;
-
-            if (format === 'html') {
-                output.textContent = cleanHTML(content);
-            } else if (format === 'javascript') {
-                output.textContent = convertToJavaScript(content);
-            }
-
-            hideStatus();
-        });
-    }
-
-    // Copie dans le presse-papiers
-    if (copyBtn && output) {
-    copyBtn.addEventListener('click', async () => {
-        const text = output.textContent;
-        
-        if (!text) {
-            showStatus('Aucun contenu à copier', 'error');
-            return;
-        }
-
-        try {
-            await navigator.clipboard.writeText(text);
-            showStatus('✓ Copié dans le presse-papiers !', 'success');
-        } catch (err) {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            textarea.style.position = 'fixed';
-            textarea.style.opacity = '0';
-            document.body.appendChild(textarea);
-            textarea.select();
-            
-            try {
-                document.execCommand('copy');
-                showStatus('✓ Copié dans le presse-papiers !', 'success');
-            } catch (e) {
-                showStatus('Erreur lors de la copie', 'error');
-            }
-            
-            document.body.removeChild(textarea);
-        }
-    });
-    }
-
     // Raccourcis clavier
     editor.addEventListener('keydown', (e) => {
         if (e.ctrlKey || e.metaKey) {
@@ -316,7 +251,7 @@ function initEditor() {
      */
     function markAsModified() {
         if (!saveBtn.textContent.includes('*')) {
-            saveBtn.textContent = 'Publier *';
+            saveBtn.textContent = 'Enregistrer *';
             saveBtn.title = 'Des modifications non enregistrées';
         }
     }
@@ -326,8 +261,8 @@ function initEditor() {
      */
     function markAsSaved() {
         hasUnsavedChanges = false;
-        saveBtn.textContent = 'Publier';
-        saveBtn.title = 'Publier l\'article';
+        saveBtn.textContent = 'Enregistrer';
+        saveBtn.title = 'Enregistrer l\'article';
     }
 
     /**
@@ -464,16 +399,8 @@ DATE: ${new Date().toLocaleDateString('fr-FR')}
 
 ${textContent}`;
         
-        // Diagnostic : vérifier la disponibilité de l'API
-        console.log('Navigateur:', navigator.userAgent);
-        console.log('API showSaveFilePicker disponible:', 'showSaveFilePicker' in window);
-        
-        // Vérifier si l'API File System Access est disponible
         if ('showSaveFilePicker' in window) {
             try {
-                console.log('Tentative d\'ouverture du dialogue de sauvegarde...');
-                
-                // Ouvrir le dialogue de sauvegarde
                 const handle = await window.showSaveFilePicker({
                     suggestedName: filename,
                     types: [{
@@ -483,32 +410,19 @@ ${textContent}`;
                     excludeAcceptAllOption: false
                 });
                 
-                console.log('Dialogue accepté, écriture du fichier...');
-                
-                // Créer un flux d'écriture
                 const writable = await handle.createWritable();
-                
-                // Écrire le contenu
                 await writable.write(fullContent);
-                
-                // Fermer le fichier
                 await writable.close();
-                
-                console.log('Fichier enregistré avec succès');
                 showStatus(`✓ Fichier "${filename}" enregistré avec succès !`, 'success');
             } catch (err) {
                 // L'utilisateur a annulé ou une erreur s'est produite
                 if (err.name === 'AbortError') {
-                    console.log('Sauvegarde annulée par l\'utilisateur');
                     showStatus('Sauvegarde annulée', 'error');
                 } else {
-                    console.error('Erreur lors de la sauvegarde:', err);
                     showStatus(`❌ Erreur: ${err.message}`, 'error');
                 }
             }
         } else {
-            // Fallback : téléchargement classique
-            console.warn('API showSaveFilePicker non disponible, utilisation du téléchargement classique');
             alert('⚠️ Votre navigateur ne supporte pas le choix d\'emplacement.\n\nRecommandation :\n- Utilisez Chrome ou Edge (version récente)\n- Ou le fichier sera téléchargé dans votre dossier Téléchargements');
             
             const blob = new Blob([fullContent], { type: 'text/plain;charset=utf-8' });
@@ -631,8 +545,6 @@ ${textContent}`;
         currentArticleId = null;
         articleSubject.value = '';
         editor.innerHTML = '<p>Commencez à écrire ou tapez / pour choisir un bloc</p>';
-        output.textContent = '';
-        
         hasUnsavedChanges = false;
         markAsSaved();
         refreshArticlesList();
@@ -776,81 +688,9 @@ ${textContent}`;
     }
 
     /**
-     * Nettoie le HTML
-     */
-    function cleanHTML(html) {
-        const temp = document.createElement('div');
-        temp.innerHTML = html;
-
-        temp.querySelectorAll('[style]').forEach(el => {
-            el.removeAttribute('style');
-        });
-
-        temp.querySelectorAll('font, span').forEach(el => {
-            const parent = el.parentNode;
-            while (el.firstChild) {
-                parent.insertBefore(el.firstChild, el);
-            }
-            parent.removeChild(el);
-        });
-
-        return formatHTML(temp.innerHTML);
-    }
-
-    /**
-     * Formate le HTML
-     */
-    function formatHTML(html) {
-        let formatted = '';
-        let indent = 0;
-        const tab = '    ';
-
-        html = html.replace(/\s+/g, ' ');
-
-        const tokens = html.split(/(<\/?[^>]+>)/g).filter(token => token.trim());
-
-        tokens.forEach(token => {
-            if (token.match(/^<\/\w/)) {
-                indent = Math.max(0, indent - 1);
-                formatted += tab.repeat(indent) + token.trim() + '\n';
-            } else if (token.match(/^<\w[^>]*[^\/]>$/)) {
-                formatted += tab.repeat(indent) + token.trim() + '\n';
-                indent++;
-            } else if (token.match(/^<\w[^>]*\/>$/)) {
-                formatted += tab.repeat(indent) + token.trim() + '\n';
-            } else {
-                const text = token.trim();
-                if (text) {
-                    formatted += tab.repeat(indent) + text + '\n';
-                }
-            }
-        });
-
-        return formatted.trim();
-    }
-
-    /**
-     * Convertit en JavaScript
-     */
-    function convertToJavaScript(html) {
-        const cleanedHTML = cleanHTML(html);
-
-        const escaped = cleanedHTML
-            .replace(/\\/g, '\\\\')
-            .replace(/`/g, '\\`')
-            .replace(/\$\{/g, '\\${');
-
-        return `const articleContent = \`
-${escaped}
-\`;
-
-export default articleContent;`;
-    }
-
-    /**
      * Sauvegarde dans le localStorage
      */
-    function saveToLocalStorage(isAutoSave = false) {
+    function saveToLocalStorage() {
         const content = editor.innerHTML;
         const subject = articleSubject.value;
         const timestamp = new Date().toLocaleString('fr-FR');
@@ -904,14 +744,13 @@ export default articleContent;`;
     }
 
 // ─── Sidebar toggle (mobile) ────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', function () {
+(function () {
     var sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
     if (sidebarToggleBtn) {
         sidebarToggleBtn.addEventListener('click', function () {
-            var sidebar = document.querySelector('.sidebar');
-            sidebar.classList.toggle('open');
+            document.querySelector('.sidebar').classList.toggle('open');
         });
     }
-});
+})();
 
 
