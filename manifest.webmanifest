@@ -1,6 +1,6 @@
 {
-  "name": "Le Scribouill'art — Éditeur d'articles",
-  "short_name": "Scribouill'art",
+  "name": "Text — L'éditeur",
+  "short_name": "Text",
   "description": "Éditeur d'articles en local.",
   "lang": "fr",
   "start_url": "./index.html",

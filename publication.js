@@ -64,7 +64,6 @@ initEditor();
 async function initEditor() {
     const editor = document.getElementById('editor');
     const articleSubject = document.getElementById('articleSubject');
-    const statusMessage = document.getElementById('statusMessage');
     const linkBtn = document.getElementById('linkBtn');
     const unlinkBtn = document.getElementById('unlinkBtn');
     const imageBtn = document.getElementById('imageBtn');
@@ -791,21 +790,13 @@ async function initEditor() {
         }
     }
 
-        /**
-         * Affiche un message de statut
-         */
-        function showStatus(message, type) {
-            // Notifications désactivées
-        }
-    
-        /**
-         * Cache le message de statut
-         */
-        function hideStatus() {
-            statusMessage.textContent = '';
-            statusMessage.className = 'status-message';
-        }
+    /**
+     * Affiche un message de statut (stub — notifications désactivées)
+     */
+    function showStatus(message, type) {
+        // Notifications désactivées
     }
+}
 
 // ─── Sidebar toggle (mobile) ────────────────────────────────────────────────
 (function () {

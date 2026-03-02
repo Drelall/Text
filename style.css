@@ -200,14 +200,6 @@ body.editor-page .main {
     position: relative;
 }
 
-.logo-row {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-}
-
 .logo {
     font-family: 'Rozha One', serif;
     font-size: 3.5rem;
@@ -227,39 +219,6 @@ body.editor-page .main {
     display: flex;
     align-items: center;
     gap: 1rem;
-}
-
-.nav {
-    display: flex;
-    gap: 2rem;
-}
-
-.nav-link {
-    color: #a8a8a8;
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.3s ease;
-    position: relative;
-}
-
-.nav-link:hover,
-.nav-link.active {
-    color: #7ba3d8;
-}
-
-.nav-link::after {
-    content: '';
-    position: absolute;
-    bottom: -5px;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background: #7ba3d8;
-    transition: width 0.3s ease;
-}
-
-.nav-link:hover::after {
-    width: 100%;
 }
 
 .container {
@@ -286,47 +245,8 @@ body.editor-page .main {
     border-top: 1px solid #4a4956;
 }
 
-.footer-nav {
-    margin-bottom: 1rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 2rem;
-}
-
-.footer-link {
-    color: #e0e0e0;
-    text-decoration: none;
-    transition: color 0.3s ease;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-}
-
-.footer-link:hover {
-    color: #7ba3d8;
-}
-
-.footer-icon-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.3rem;
-    border-radius: 50%;
-    transition: all 0.3s ease;
-}
-
-.footer-icon-link:hover {
-    background: rgba(123, 163, 216, 0.2);
-    transform: scale(1.1);
-}
-
-.footer-icon-link svg {
-    display: block;
-}
-
 .footer-copyright {
     text-align: center;
-    margin-top: 1rem;
     color: #ccc;
     font-size: 0.85rem;
 }
@@ -343,7 +263,6 @@ body.editor-page .main {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 12px;
 }
 
 .dark-mode-toggle:hover {
@@ -365,13 +284,6 @@ body.editor-page .main {
     z-index: 100;
     min-height: 50px;
     gap: 1rem;
-}
-
-.top-bar-left {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    flex: 1;
 }
 
 .top-bar-actions {
@@ -724,17 +636,6 @@ body.editor-page .main {
     border-color: var(--editor-accent-hover);
 }
 
-.wp-button.danger {
-    border-color: var(--editor-border-color);
-    color: var(--editor-text-primary);
-}
-
-.wp-button.danger:hover {
-    background: #fcf0f1;
-    border-color: #d63638;
-    color: #d63638;
-}
-
 .status-message {
     position: fixed;
     bottom: 2rem;
@@ -1077,11 +978,6 @@ body.editor-page .main {
         display: none;
     }
 
-    /* Zone YouTube de l'ancienne sidebar (sécurité) */
-    .youtube-player-sidebar {
-        display: none;
-    }
-
     /* Éditeur principal */
     .editor-wrapper {
         padding: 1rem;
@@ -1110,9 +1006,4 @@ body.editor-page .main {
         font-size: 12px;
     }
 
-    /* Footer */
-    .footer-nav {
-        flex-wrap: wrap;
-        gap: 1rem;
-    }
 }

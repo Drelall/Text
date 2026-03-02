@@ -1,4 +1,4 @@
-# Le Scribouill'art — Éditeur (PWA)
+# Text — L'éditeur (PWA)
 
 Ce dossier contient une PWA (Progressive Web App) installable (Windows / Android via Chrome/Edge).
 
@@ -34,9 +34,7 @@ Ce dossier contient une PWA (Progressive Web App) installable (Windows / Android
 Notes importantes :
 - Sur GitHub Pages, l’URL ressemble souvent à `https://<user>.github.io/<repo>/...`.
 	Les chemins relatifs (ce projet utilise `./`) sont adaptés.
-- Si tu laisses des liens/images vers `../index.html` ou `../images/...`, ils seront **cassés**
-	si ces fichiers ne sont pas présents dans le dépôt. Soit tu ajoutes ces dossiers/fichiers,
-	soit tu enlèves/ajustes ces liens dans `index.html`.
+
 
 ### Option B : zip + serveur local
 - Zippe le dossier
