@@ -12,7 +12,6 @@ function initEditor() {
     const sourceBtn = document.getElementById('sourceBtn');
     const saveBtn = document.getElementById('saveBtn');
     const loadBtn = document.getElementById('loadBtn');
-    const clearBtn = document.getElementById('clearBtn');
     const newArticleBtn = document.getElementById('newArticleBtn');
     const articlesList = document.getElementById('articlesList');
     const darkModeToggle = document.getElementById('darkModeToggle');
@@ -180,20 +179,6 @@ function initEditor() {
         };
         
         input.click();
-    });
-
-    // Bouton Effacer
-    clearBtn.addEventListener('click', () => {
-        if (confirm('Êtes-vous sûr de vouloir effacer tout le contenu ? Cette action est irréversible.')) {
-            articleSubject.value = '';
-            editor.innerHTML = '<p>Hello !</p>';
-            if (output) {
-                output.textContent = '';
-            }
-            hasUnsavedChanges = false;
-            markAsSaved();
-            showStatus('✓ Contenu effacé !', 'success');
-        }
     });
 
     // Raccourcis clavier
