@@ -1,8 +1,67 @@
 
+// ─── IndexedDB ─────────────────────────────────────────────────────────────
+const _DB_NAME = 'scribouillart_db';
+const _DB_VERSION = 1;
+const _DB_STORE = 'articles';
+let _db = null;
+
+function _openDB() {
+    return new Promise((resolve, reject) => {
+        if (_db) { resolve(_db); return; }
+        const req = indexedDB.open(_DB_NAME, _DB_VERSION);
+        req.onupgradeneeded = (e) => {
+            const database = e.target.result;
+            if (!database.objectStoreNames.contains(_DB_STORE)) {
+                database.createObjectStore(_DB_STORE, { keyPath: 'id' });
+            }
+        };
+        req.onsuccess = (e) => { _db = e.target.result; resolve(_db); };
+        req.onerror = () => reject(req.error);
+    });
+}
+
+function _dbGetAll() {
+    return _openDB().then(db => new Promise((resolve, reject) => {
+        const req = db.transaction(_DB_STORE, 'readonly').objectStore(_DB_STORE).getAll();
+        req.onsuccess = () => resolve((req.result || []).sort((a, b) => b.id - a.id));
+        req.onerror = () => reject(req.error);
+    }));
+}
+
+function _dbPut(article) {
+    return _openDB().then(db => new Promise((resolve, reject) => {
+        const req = db.transaction(_DB_STORE, 'readwrite').objectStore(_DB_STORE).put(article);
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+    }));
+}
+
+function _dbDelete(id) {
+    return _openDB().then(db => new Promise((resolve, reject) => {
+        const req = db.transaction(_DB_STORE, 'readwrite').objectStore(_DB_STORE).delete(id);
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+    }));
+}
+
+async function _migrateFromLocalStorage() {
+    try {
+        const stored = localStorage.getItem('scribouillart_articles');
+        if (!stored) return;
+        const articles = JSON.parse(stored);
+        if (!articles || articles.length === 0) return;
+        for (const article of articles) { await _dbPut(article); }
+        localStorage.removeItem('scribouillart_articles');
+        console.log(`Migration : ${articles.length} article(s) migré(s) vers IndexedDB`);
+    } catch (e) {
+        console.warn('Migration localStorage → IndexedDB échouée', e);
+    }
+}
+
 // Initialiser l'éditeur
 initEditor();
 
-function initEditor() {
+async function initEditor() {
     const editor = document.getElementById('editor');
     const articleSubject = document.getElementById('articleSubject');
     const statusMessage = document.getElementById('statusMessage');
@@ -28,9 +87,13 @@ function initEditor() {
 
     // Charger le contenu sauvegardé au démarrage
     loadFromLocalStorage();
-    
+
+    // Ouvrir IndexedDB et migrer les données existantes
+    await _openDB();
+    await _migrateFromLocalStorage();
+
     // Afficher la liste des articles
-    refreshArticlesList();
+    await refreshArticlesList();
 
     // Charger la préférence du mode nuit
     loadDarkModePreference();
@@ -148,19 +211,19 @@ function initEditor() {
     });
 
     // Bouton Ajouter (sauvegarde dans la liste sans exporter)
-    addBtn.addEventListener('click', () => {
+    addBtn.addEventListener('click', async () => {
         const subject = articleSubject.value.trim();
         if (!subject) {
             alert('Veuillez saisir un objet avant d\'ajouter l\'article.');
             return;
         }
-        saveArticleToList(subject, editor.innerHTML);
+        await saveArticleToList(subject, editor.innerHTML);
         markAsSaved();
     });
 
     // Bouton Nouvel Article
-    newArticleBtn.addEventListener('click', () => {
-        createNewArticle();
+    newArticleBtn.addEventListener('click', async () => {
+        await createNewArticle();
     });
 
     // Bouton Importer
@@ -442,16 +505,16 @@ function initEditor() {
 
         const close = () => document.body.removeChild(overlay);
 
-        modal.querySelector('#_dlTxt').addEventListener('click', () => {
+        modal.querySelector('#_dlTxt').addEventListener('click', async () => {
             close();
-            downloadTextFile(subject, plainText);
-            saveArticleToList(subject, htmlContent);
+            await downloadTextFile(subject, plainText);
+            await saveArticleToList(subject, htmlContent);
             markAsSaved();
         });
-        modal.querySelector('#_dlDoc').addEventListener('click', () => {
+        modal.querySelector('#_dlDoc').addEventListener('click', async () => {
             close();
-            downloadWordFile(subject, htmlContent);
-            saveArticleToList(subject, htmlContent);
+            await downloadWordFile(subject, htmlContent);
+            await saveArticleToList(subject, htmlContent);
             markAsSaved();
         });
         modal.querySelector('#_dlCancel').addEventListener('click', close);
@@ -568,7 +631,7 @@ function initEditor() {
     /**
      * Crée un nouvel article vierge
      */
-    function createNewArticle() {
+    async function createNewArticle() {
         if (hasUnsavedChanges && !confirm('Voulez-vous créer un nouvel article ? Les modifications non enregistrées seront perdues.')) {
             return;
         }
@@ -578,16 +641,14 @@ function initEditor() {
         editor.innerHTML = '<p>Hello !</p>';
         hasUnsavedChanges = false;
         markAsSaved();
-        refreshArticlesList();
+        await refreshArticlesList();
         showStatus('✓ Nouvel article créé !', 'success');
     }
 
     /**
-     * Sauvegarde l'article dans la liste
+     * Sauvegarde l'article dans la liste (IndexedDB)
      */
-    function saveArticleToList(subject, content) {
-        const articles = getArticlesList();
-        
+    async function saveArticleToList(subject, content) {
         const article = {
             id: currentArticleId || Date.now(),
             subject: subject,
@@ -595,27 +656,9 @@ function initEditor() {
             preview: getTextPreview(content),
             date: new Date().toLocaleString('fr-FR')
         };
-        
-        const existingIndex = articles.findIndex(a => a.id === article.id);
-        
-        if (existingIndex >= 0) {
-            articles[existingIndex] = article;
-        } else {
-            articles.unshift(article);
-        }
-        
-        localStorage.setItem('scribouillart_articles', JSON.stringify(articles));
-        
+        await _dbPut(article);
         currentArticleId = article.id;
-        refreshArticlesList();
-    }
-
-    /**
-     * Récupère la liste des articles
-     */
-    function getArticlesList() {
-        const stored = localStorage.getItem('scribouillart_articles');
-        return stored ? JSON.parse(stored) : [];
+        await refreshArticlesList();
     }
 
     /**
@@ -629,10 +672,10 @@ function initEditor() {
     }
 
     /**
-     * Rafraîchit l'affichage de la liste
+     * Rafraîchit l'affichage de la liste (IndexedDB)
      */
-    function refreshArticlesList() {
-        const articles = getArticlesList();
+    async function refreshArticlesList() {
+        const articles = await _dbGetAll();
         
         if (articles.length === 0) {
             articlesList.innerHTML = '<div class="no-articles">Aucun article sauvegardé</div>';
@@ -651,29 +694,29 @@ function initEditor() {
         `).join('');
         
         articlesList.querySelectorAll('.article-card-item').forEach(card => {
-            card.addEventListener('click', () => {
+            card.addEventListener('click', async () => {
                 const id = parseInt(card.dataset.id);
-                loadArticleFromList(id);
+                await loadArticleFromList(id);
             });
         });
         
         articlesList.querySelectorAll('.article-card-delete').forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', async () => {
                 const id = parseInt(btn.dataset.id);
-                deleteArticleFromList(id);
+                await deleteArticleFromList(id);
             });
         });
     }
 
     /**
-     * Charge un article depuis la liste
+     * Charge un article depuis la liste (IndexedDB)
      */
-    function loadArticleFromList(id) {
+    async function loadArticleFromList(id) {
         if (hasUnsavedChanges && !confirm('Charger cet article ? Les modifications non enregistrées seront perdues.')) {
             return;
         }
         
-        const articles = getArticlesList();
+        const articles = await _dbGetAll();
         const article = articles.find(a => a.id === id);
         
         if (article) {
@@ -683,29 +726,26 @@ function initEditor() {
             
             hasUnsavedChanges = false;
             markAsSaved();
-            refreshArticlesList();
+            await refreshArticlesList();
             showStatus(`✓ Article "${article.subject}" chargé !`, 'success');
         }
     }
 
     /**
-     * Supprime un article de la liste
+     * Supprime un article de la liste (IndexedDB)
      */
-    function deleteArticleFromList(id) {
+    async function deleteArticleFromList(id) {
         if (!confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) {
             return;
         }
         
-        const articles = getArticlesList();
-        const filteredArticles = articles.filter(a => a.id !== id);
-        
-        localStorage.setItem('scribouillart_articles', JSON.stringify(filteredArticles));
+        await _dbDelete(id);
         
         if (currentArticleId === id) {
             currentArticleId = null;
         }
         
-        refreshArticlesList();
+        await refreshArticlesList();
         showStatus('✓ Article supprimé !', 'success');
     }
 
