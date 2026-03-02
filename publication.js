@@ -151,33 +151,89 @@ function initEditor() {
         createNewArticle();
     });
 
-    // Bouton Charger
+    // Bouton Importer
     loadBtn.addEventListener('click', () => {
         const input = document.createElement('input');
         input.type = 'file';
-        input.accept = '.html,.txt';
-        
+        input.accept = '.html,.htm,.txt,.md,.docx,.rtf,.odt';
+
         input.onchange = (e) => {
             const file = e.target.files[0];
-            if (file) {
+            if (!file) return;
+
+            const ext = file.name.split('.').pop().toLowerCase();
+
+            // Nom du fichier comme sujet par défaut
+            const defaultSubject = file.name.replace(/\.[^.]+$/, '');
+
+            const applyContent = (html) => {
+                editor.innerHTML = html || '<p></p>';
+                if (!articleSubject.value.trim()) {
+                    articleSubject.value = defaultSubject;
+                }
+                hasUnsavedChanges = true;
+                markAsModified();
+                saveToLocalStorage();
+                editor.focus();
+            };
+
+            // Fichier Word .docx → mammoth.js
+            if (ext === 'docx') {
+                if (typeof mammoth === 'undefined') {
+                    alert('Import Word indisponible hors connexion.');
+                    return;
+                }
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    const content = event.target.result;
-                    
+                    mammoth.convertToHtml({ arrayBuffer: event.target.result })
+                        .then(result => applyContent(result.value))
+                        .catch(() => alert('Impossible de lire ce fichier Word.'));
+                };
+                reader.readAsArrayBuffer(file);
+                return;
+            }
+
+            // Tous les autres formats → lecture texte
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const content = event.target.result;
+                let html = '';
+
+                if (ext === 'html' || ext === 'htm') {
                     const subjectMatch = content.match(/<!-- Objet: (.+?) -->/);
                     if (subjectMatch) {
                         articleSubject.value = subjectMatch[1];
-                        editor.innerHTML = content.replace(/<!-- .+? -->\n*/g, '').trim();
+                        html = content.replace(/<!-- .+? -->\n*/g, '').trim();
                     } else {
-                        editor.innerHTML = content;
+                        html = content;
                     }
-                    
-                    showStatus('✓ Fichier chargé !', 'success');
-                };
-                reader.readAsText(file);
-            }
+                } else if (ext === 'md') {
+                    html = content
+                        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+                        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+                        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+                        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                        .replace(/^- (.+)$/gm, '<li>$1</li>')
+                        .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+                        .replace(/\n{2,}/g, '</p><p>')
+                        .replace(/^(?!<[hHuUpP])(.+)$/gm, '<p>$1</p>');
+                } else {
+                    const escaped = content
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;');
+                    html = escaped
+                        .split(/\n{2,}/)
+                        .map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`)
+                        .join('');
+                }
+
+                applyContent(html);
+            };
+            reader.readAsText(file);
         };
-        
+
         input.click();
     });
 
