@@ -11,6 +11,7 @@ function initEditor() {
     const imageBtn = document.getElementById('imageBtn');
     const sourceBtn = document.getElementById('sourceBtn');
     const saveBtn = document.getElementById('saveBtn');
+    const addBtn = document.getElementById('addBtn');
     const loadBtn = document.getElementById('loadBtn');
     const newArticleBtn = document.getElementById('newArticleBtn');
     const articlesList = document.getElementById('articlesList');
@@ -144,6 +145,17 @@ function initEditor() {
     // Bouton Enregistrer
     saveBtn.addEventListener('click', () => {
         publishArticle();
+    });
+
+    // Bouton Ajouter (sauvegarde dans la liste sans exporter)
+    addBtn.addEventListener('click', () => {
+        const subject = articleSubject.value.trim();
+        if (!subject) {
+            alert('Veuillez saisir un objet avant d\'ajouter l\'article.');
+            return;
+        }
+        saveArticleToList(subject, editor.innerHTML);
+        markAsSaved();
     });
 
     // Bouton Nouvel Article
@@ -291,10 +303,7 @@ function initEditor() {
      * Marque l'article comme modifié
      */
     function markAsModified() {
-        if (!saveBtn.textContent.includes('*')) {
-            saveBtn.textContent = 'Enregistrer *';
-            saveBtn.title = 'Des modifications non enregistrées';
-        }
+        // indicateur visuel désactivé
     }
 
     /**
