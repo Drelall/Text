@@ -30,15 +30,16 @@
         } else {
             homeBtn.addEventListener('click', function() {
                 overlay.classList.remove('welcome-out');
+                overlay.classList.add('welcome-in');
                 overlay.style.display = 'flex';
             });
         }
     }
 
-    // Toujours afficher l'overlay au chargement (sauf en mode standalone)
+    // Masquer immédiatement si l'app est installée en mode standalone
     var isStandaloneLoad = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-    if (!isStandaloneLoad) {
-        overlay.style.display = 'flex';
+    if (isStandaloneLoad) {
+        overlay.style.display = 'none';
     }
 
     function closeOverlay() {
