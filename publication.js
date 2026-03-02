@@ -186,7 +186,7 @@ function initEditor() {
     clearBtn.addEventListener('click', () => {
         if (confirm('Êtes-vous sûr de vouloir effacer tout le contenu ? Cette action est irréversible.')) {
             articleSubject.value = '';
-            editor.innerHTML = '<p>Commencez à écrire ou tapez / pour choisir un bloc</p>';
+            editor.innerHTML = '<p>Hello !</p>';
             if (output) {
                 output.textContent = '';
             }
@@ -525,7 +525,7 @@ function initEditor() {
         
         currentArticleId = null;
         articleSubject.value = '';
-        editor.innerHTML = '<p>Commencez à écrire ou tapez / pour choisir un bloc</p>';
+        editor.innerHTML = '<p>Hello !</p>';
         hasUnsavedChanges = false;
         markAsSaved();
         refreshArticlesList();
