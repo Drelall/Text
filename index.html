@@ -11,6 +11,25 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="editor-page">
+    <!-- ─── Écran d'accueil (première visite) ─── -->
+    <div id="welcomeOverlay" style="display:none">
+        <div class="welcome-card">
+            <h2 class="welcome-title">Text</h2>
+            <p class="welcome-sub">L'éditeur</p>
+            <p class="welcome-desc">Comment souhaitez-vous utiliser l'application ?</p>
+            <div class="welcome-actions">
+                <button class="welcome-btn primary" id="welcomeUse">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+                    Utiliser dans le navigateur
+                </button>
+                <button class="welcome-btn" id="welcomeInstall">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v13m0 0-4-4m4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+                    Télécharger l'application
+                </button>
+            </div>
+            <p class="welcome-note" id="welcomeNote"></p>
+        </div>
+    </div>
     <a href="#main-content" class="skip-link">Aller au contenu principal</a>
     <header class="header">
         <div class="container">
@@ -206,5 +225,47 @@
     <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
     <!-- API IFrame YouTube pour piloter volume + lecture -->
     <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+    // ─── Écran d'accueil ───
+    (function() {
+        var overlay = document.getElementById('welcomeOverlay');
+        if (!overlay) return;
+
+        // Ne plus montrer si déjà choisi
+        if (localStorage.getItem('scribouillart_welcomed')) return;
+
+        overlay.style.display = 'flex';
+
+        var deferredPrompt = null;
+        window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+
+        document.getElementById('welcomeUse').addEventListener('click', function() {
+            localStorage.setItem('scribouillart_welcomed', '1');
+            overlay.classList.add('welcome-out');
+            setTimeout(function() { overlay.style.display = 'none'; }, 400);
+        });
+
+        document.getElementById('welcomeInstall').addEventListener('click', function() {
+            var note = document.getElementById('welcomeNote');
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(function(result) {
+                    if (result.outcome === 'accepted') {
+                        localStorage.setItem('scribouillart_welcomed', '1');
+                        overlay.classList.add('welcome-out');
+                        setTimeout(function() { overlay.style.display = 'none'; }, 400);
+                    }
+                    deferredPrompt = null;
+                });
+            } else {
+                // Navigateur non compatible ou déjà installé
+                note.textContent = 'Sur Chrome : Menu ⋮ → « Installer l’application ». Sur iOS : Partager → Sur l’écran d’accueil.';
+            }
+        });
+    })();
+    </script>
 </body>
 </html>
