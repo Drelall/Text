@@ -425,6 +425,7 @@ body.editor-page .main {
     padding: 0.75rem;
     cursor: pointer;
     transition: all 0.1s ease;
+    position: relative;
 }
 
 .article-card-item:hover {
@@ -466,20 +467,29 @@ body.editor-page .main {
 }
 
 .article-card-delete {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
     background: transparent;
-    color: #d63638;
-    border: 1px solid #d63638;
-    padding: 0.25rem 0.5rem;
-    border-radius: 2px;
+    color: var(--editor-text-muted);
+    border: none;
+    padding: 0.25rem;
+    border-radius: 4px;
     cursor: pointer;
-    font-size: 11px;
-    margin-top: 0.5rem;
-    transition: all 0.1s ease;
+    opacity: 0;
+    transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.article-card-item:hover .article-card-delete {
+    opacity: 1;
 }
 
 .article-card-delete:hover {
-    background: #d63638;
-    color: #fff;
+    color: #d63638;
+    background: rgba(214, 54, 56, 0.1);
 }
 
 .no-articles {

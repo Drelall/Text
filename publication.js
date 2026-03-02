@@ -594,8 +594,8 @@ function initEditor() {
                 <div class="article-card-subject">${escapeHtml(article.subject)}</div>
                 <div class="article-card-preview">${escapeHtml(article.preview)}</div>
                 <div class="article-card-date">${article.date}</div>
-                <button class="article-card-delete" data-id="${article.id}" onclick="event.stopPropagation()">
-                    🗑️ Supprimer
+                <button class="article-card-delete" data-id="${article.id}" onclick="event.stopPropagation()" title="Supprimer l'article" aria-label="Supprimer l'article">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
                 </button>
             </div>
         `).join('');
@@ -705,14 +705,7 @@ function initEditor() {
          * Affiche un message de statut
          */
         function showStatus(message, type) {
-            statusMessage.textContent = message;
-            statusMessage.className = `status-message ${type}`;
-            
-            if (type === 'success') {
-                setTimeout(() => {
-                    hideStatus();
-                }, 3000);
-            }
+            // Notifications désactivées
         }
     
         /**
