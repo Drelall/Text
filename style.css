@@ -692,6 +692,46 @@ body.editor-page .main {
     background: var(--editor-bg-tertiary);
 }
 
+.youtube-add-btn {
+    background: transparent;
+    border: 1px solid var(--editor-border-color);
+    color: var(--editor-text-primary);
+    width: 22px;
+    height: 22px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+}
+
+.youtube-add-btn:hover {
+    background: var(--editor-accent-color);
+    color: #fff;
+    border-color: var(--editor-accent-color);
+}
+
+.youtube-manage-btn {
+    background: transparent;
+    border: 1px solid var(--editor-border-color);
+    color: var(--editor-text-primary);
+    width: 22px;
+    height: 22px;
+    border-radius: 3px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+}
+
+.youtube-manage-btn:hover {
+    background: var(--editor-bg-tertiary);
+}
+
 .top-bar-youtube-content.collapsed {
     display: none;
 }
