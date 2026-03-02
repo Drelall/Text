@@ -672,82 +672,6 @@ body.editor-page .main {
     flex-shrink: 0;
 }
 
-.top-bar-youtube-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--editor-text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.youtube-toggle {
-    background: transparent;
-    border: 1px solid var(--editor-border-color);
-    color: var(--editor-text-primary);
-    width: 22px;
-    height: 22px;
-    border-radius: 3px;
-    cursor: pointer;
-    font-size: 14px;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s;
-}
-
-.youtube-toggle:hover {
-    background: var(--editor-bg-tertiary);
-}
-
-.youtube-add-btn {
-    background: transparent;
-    border: 1px solid var(--editor-border-color);
-    color: var(--editor-text-primary);
-    width: 22px;
-    height: 22px;
-    border-radius: 3px;
-    cursor: pointer;
-    font-size: 16px;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s, color 0.2s;
-}
-
-.youtube-add-btn:hover {
-    background: var(--editor-accent-color);
-    color: #fff;
-    border-color: var(--editor-accent-color);
-}
-
-.youtube-manage-btn {
-    background: transparent;
-    border: 1px solid var(--editor-border-color);
-    color: var(--editor-text-primary);
-    width: 22px;
-    height: 22px;
-    border-radius: 3px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s, color 0.2s;
-}
-
-.youtube-manage-btn:hover {
-    background: var(--editor-bg-tertiary);
-}
-
-.top-bar-youtube-content.collapsed {
-    display: none;
-}
-
 /* ── Lecteur audio custom style SoundCloud ── */
 .sc-player {
     display: flex;
@@ -875,6 +799,59 @@ body.editor-page .main {
     display: flex;
     align-items: center;
     gap: 5px;
+}
+
+/* Boutons d'actions dans le lecteur */
+.sc-actions {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    border-left: 1px solid #2b2b2b;
+    padding-left: 8px;
+    margin-left: 4px;
+}
+
+.sc-action-btn {
+    background: transparent;
+    border: 1px solid #333;
+    color: #aaa;
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    flex-shrink: 0;
+}
+
+.sc-action-btn:hover {
+    background: #1a1a1a;
+    border-color: #555;
+    color: #fff;
+}
+
+/* État réduit du lecteur */
+.sc-player.minimized .sc-skip-btn,
+.sc-player.minimized .sc-play-btn,
+.sc-player.minimized .sc-info,
+.sc-player.minimized .sc-right {
+    display: none;
+}
+
+.sc-player.minimized {
+    width: auto;
+    min-width: unset;
+    padding: 6px 10px;
+}
+
+.sc-player.minimized .sc-actions {
+    border-left: none;
+    padding-left: 0;
+    margin-left: 0;
 }
 
 .sc-volume {

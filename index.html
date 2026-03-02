@@ -69,47 +69,41 @@
         <div class="top-bar">
             <!-- Lecteur YouTube compact -->
             <div class="top-bar-youtube">
-                <div class="top-bar-youtube-header">
-                    <span>Musique</span>
-                    <button class="youtube-add-btn" id="youtubeAddBtn" title="Ajouter une piste">+</button>
-                    <button class="youtube-manage-btn" id="youtubeManageBtn" title="Gérer les pistes">
-                        <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <div id="ytApiContainer" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;"></div>
+                <!-- Lecteur custom style SoundCloud -->
+                <div class="sc-player" id="scPlayer">
+                    <button class="sc-skip-btn" id="scPrevBtn" title="Piste précédente" aria-label="Piste précédente">
+                        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="currentColor">
+                            <path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/>
+                        </svg>
                     </button>
-                    <button class="youtube-toggle" id="youtubeToggle" title="Réduire/Agrandir">−</button>
-                </div>
-                <div class="top-bar-youtube-content" id="youtubeContent">
-                    <!-- Conteneur caché pour l'API YouTube -->
-                    <div id="ytApiContainer" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;"></div>
-                    <!-- Lecteur custom style SoundCloud -->
-                    <div class="sc-player" id="scPlayer">
-                        <button class="sc-skip-btn" id="scPrevBtn" title="Piste précédente" aria-label="Piste précédente">
-                            <!-- Bouton précédent style SoundCloud : barre + triangle gauche -->
-                            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="currentColor">
-                                <path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/>
-                            </svg>
-                        </button>
-                        <button class="sc-play-btn" id="scPlayBtn" title="Lecture / Pause" aria-label="Lecture / Pause">
-                            <svg class="sc-icon-play" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M8 5v14l11-7z"/></svg>
-                            <svg class="sc-icon-pause" viewBox="0 0 24 24" fill="currentColor" width="20" height="20" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                        </button>
-                        <button class="sc-skip-btn" id="scNextBtn" title="Piste suivante" aria-label="Piste suivante">
-                            <!-- Bouton suivant style SoundCloud : triangle droit + barre -->
-                            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="currentColor">
-                                <path d="M6 18l8.5-6L6 6v12zm8.5-6v6H17V6h-2.5z"/>
-                            </svg>
-                        </button>
-                        <div class="sc-info">
-                            <span class="sc-title">Lofi Hip Hop Radio</span>
-                            <div class="sc-wave">
-                                <div class="sc-bars" id="scBars">
-                                    <span></span><span></span><span></span><span></span><span></span><span></span>
-                                </div>
+                    <button class="sc-play-btn" id="scPlayBtn" title="Lecture / Pause" aria-label="Lecture / Pause">
+                        <svg class="sc-icon-play" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M8 5v14l11-7z"/></svg>
+                        <svg class="sc-icon-pause" viewBox="0 0 24 24" fill="currentColor" width="20" height="20" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                    </button>
+                    <button class="sc-skip-btn" id="scNextBtn" title="Piste suivante" aria-label="Piste suivante">
+                        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="currentColor">
+                            <path d="M6 18l8.5-6L6 6v12zm8.5-6v6H17V6h-2.5z"/>
+                        </svg>
+                    </button>
+                    <div class="sc-info">
+                        <span class="sc-title">Lofi Hip Hop Radio</span>
+                        <div class="sc-wave">
+                            <div class="sc-bars" id="scBars">
+                                <span></span><span></span><span></span><span></span><span></span><span></span>
                             </div>
                         </div>
-                        <div class="sc-right">
-                            <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14" style="flex-shrink:0;opacity:0.6"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-                            <input type="range" class="sc-volume" id="scVolume" min="0" max="100" value="80" title="Volume">
-                        </div>
+                    </div>
+                    <div class="sc-right">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14" style="flex-shrink:0;opacity:0.6"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                        <input type="range" class="sc-volume" id="scVolume" min="0" max="100" value="80" title="Volume">
+                    </div>
+                    <div class="sc-actions">
+                        <button class="sc-action-btn" id="youtubeAddBtn" title="Ajouter une piste">+</button>
+                        <button class="sc-action-btn" id="youtubeManageBtn" title="Gérer les pistes">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                        </button>
+                        <button class="sc-action-btn" id="youtubeToggle" title="Réduire/Agrandir">−</button>
                     </div>
                 </div>
             </div>

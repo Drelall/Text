@@ -78,7 +78,6 @@ async function initEditor() {
     const textColor = document.getElementById('textColor');
     const bgColor = document.getElementById('bgColor');
     const youtubeToggle = document.getElementById('youtubeToggle');
-    const youtubeContent = document.getElementById('youtubeContent');
 
     let currentArticleId = null;
     let isSourceMode = false;
@@ -354,10 +353,11 @@ async function initEditor() {
     });
 
     // Toggle YouTube player
-    if (youtubeToggle && youtubeContent) {
+    if (youtubeToggle) {
+        const scPlayer = document.getElementById('scPlayer');
         youtubeToggle.addEventListener('click', () => {
-            youtubeContent.classList.toggle('collapsed');
-            youtubeToggle.textContent = youtubeContent.classList.contains('collapsed') ? '+' : '−';
+            scPlayer.classList.toggle('minimized');
+            youtubeToggle.textContent = scPlayer.classList.contains('minimized') ? '+' : '−';
         });
     }
 
