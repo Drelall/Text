@@ -176,7 +176,10 @@ function updateMusicUI(playing) {
 function updateTrackTitle() {
     var track = tracks[currentTrackIndex];
     var titleEl = document.querySelector('.sc-title');
-    if (titleEl) titleEl.textContent = track.title;
+    if (titleEl) {
+        titleEl.textContent = track.title;
+        titleEl.title = track.title;
+    }
     var thumb = document.getElementById('scThumb');
     if (thumb) thumb.src = 'https://img.youtube.com/vi/' + track.id + '/default.jpg';
 }
@@ -214,6 +217,9 @@ function onYouTubeIframeAPIReady() {
 
     if (addBtn) addBtn.addEventListener('click', _showAddTrackModal);
     if (manageBtn) manageBtn.addEventListener('click', _showManageTracksModal);
+
+    // Titre et miniature au chargement initial
+    updateTrackTitle();
 
     playBtn.addEventListener('click', function () {
         if (!ytPlayerReady || !ytPlayer) return;
