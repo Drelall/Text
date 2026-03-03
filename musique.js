@@ -182,6 +182,8 @@ function updateTrackTitle() {
     }
     var thumb = document.getElementById('scThumb');
     if (thumb) thumb.src = 'https://img.youtube.com/vi/' + track.id + '/default.jpg';
+    var thumbLink = document.getElementById('scThumbLink');
+    if (thumbLink) thumbLink.href = 'https://www.youtube.com/watch?v=' + track.id;
 }
 
 // Appelée automatiquement par l'API YouTube quand elle est prête

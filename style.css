@@ -802,6 +802,17 @@ body.editor-page .main {
     background: #e8e8e8;
 }
 
+.sc-thumb-link {
+    flex-shrink: 0;
+    display: block;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.sc-thumb-link:hover .sc-thumb {
+    opacity: 0.8;
+}
+
 .sc-thumb {
     flex-shrink: 0;
     width: 40px;
@@ -810,6 +821,7 @@ body.editor-page .main {
     object-fit: cover;
     display: block;
     border: 1px solid #333;
+    transition: opacity 0.15s;
 }
 
 .sc-info {
@@ -921,6 +933,7 @@ body.editor-page .main {
 .sc-player.minimized .sc-play-btn,
 .sc-player.minimized .sc-info,
 .sc-player.minimized .sc-thumb,
+.sc-player.minimized .sc-thumb-link,
 .sc-player.minimized .sc-right {
     display: none;
 }
