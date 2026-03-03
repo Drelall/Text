@@ -803,6 +803,16 @@ body.editor-page .main {
     transform: scale(0.95);
 }
 
+.sc-thumb {
+    flex-shrink: 0;
+    width: 40px;
+    height: 30px;
+    border-radius: 4px;
+    object-fit: cover;
+    display: block;
+    border: 1px solid #333;
+}
+
 .sc-info {
     flex: 1;
     min-width: 0;
@@ -905,6 +915,7 @@ body.editor-page .main {
 .sc-player.minimized .sc-skip-btn,
 .sc-player.minimized .sc-play-btn,
 .sc-player.minimized .sc-info,
+.sc-player.minimized .sc-thumb,
 .sc-player.minimized .sc-right {
     display: none;
 }

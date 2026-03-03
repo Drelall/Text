@@ -174,8 +174,11 @@ function updateMusicUI(playing) {
 }
 
 function updateTrackTitle() {
+    var track = tracks[currentTrackIndex];
     var titleEl = document.querySelector('.sc-title');
-    if (titleEl) titleEl.textContent = tracks[currentTrackIndex].title;
+    if (titleEl) titleEl.textContent = track.title;
+    var thumb = document.getElementById('scThumb');
+    if (thumb) thumb.src = 'https://img.youtube.com/vi/' + track.id + '/default.jpg';
 }
 
 // Appelée automatiquement par l'API YouTube quand elle est prête
