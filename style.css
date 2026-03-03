@@ -750,8 +750,8 @@ body.editor-page .main {
     border: 1px solid #2b2b2b;
     border-radius: 999px;
     padding: 6px 14px;
-    width: 320px;
-    min-width: 320px;
+    width: 420px;
+    min-width: 420px;
     box-sizing: border-box;
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
 }
