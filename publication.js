@@ -200,18 +200,44 @@ async function initEditor() {
         });
     }
 
-    // Bouton image
+    // Bouton image — ouvre un sélecteur de fichier local
     if (imageBtn) {
         imageBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            const url = prompt('Entrez l\'URL de l\'image :');
-            const alt = prompt('Texte alternatif (description) :');
-            
-            if (url) {
-                const imgHTML = `<img src="${url}" alt="${alt || ''}" style="max-width: 100%; height: auto;">`;
-                document.execCommand('insertHTML', false, imgHTML);
-            }
-            editor.focus();
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+
+            input.onchange = (ev) => {
+                const file = ev.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const img = document.createElement('img');
+                    img.src = reader.result;
+                    img.alt = file.name;
+                    img.style.maxWidth = '100%';
+                    img.style.height = 'auto';
+
+                    editor.focus();
+                    const sel = window.getSelection();
+                    if (sel && sel.rangeCount) {
+                        const range = sel.getRangeAt(0);
+                        range.deleteContents();
+                        range.insertNode(img);
+                        range.setStartAfter(img);
+                        range.collapse(true);
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                    } else {
+                        editor.appendChild(img);
+                    }
+                };
+                reader.readAsDataURL(file);
+            };
+
+            input.click();
         });
     }
 
