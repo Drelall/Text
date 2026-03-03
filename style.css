@@ -189,45 +189,9 @@ body.editor-page .main {
    HEADER & NAVIGATION
    ======================================== */
 .header {
-    background-color: #2f2e3a;
-    background-image:
-        /* Vignette douce sur les côtés */
-        radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(0,0,0,0.35) 100%),
-        /* Lignes horizontales façon papier réglé */
-        repeating-linear-gradient(
-            0deg,
-            transparent,
-            transparent 27px,
-            rgba(255,255,255,0.045) 27px,
-            rgba(255,255,255,0.045) 28px
-        ),
-        /* Ligne de marge verticale façon carnet */
-        linear-gradient(
-            90deg,
-            transparent 52px,
-            rgba(180,130,220,0.10) 52px,
-            rgba(180,130,220,0.10) 53px,
-            transparent 53px
-        ),
-        /* Dégradé de fond légèrement varié */
-        linear-gradient(135deg, #332f42 0%, #2f2e3a 50%, #2a2936 100%);
+    background: #2f2e3a;
     border-bottom: 1px solid #4a4956;
     z-index: 1000;
-    position: relative;
-    overflow: hidden;
-}
-
-/* Glyphes typographiques décoratifs */
-.header::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    background-image:
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='80'%3E%3Ctext x='18' y='58' font-family='Georgia,serif' font-size='52' fill='rgba(255,255,255,0.04)'%3E%C2%B6%3C/text%3E%3Ctext x='90' y='38' font-family='Georgia,serif' font-size='34' fill='rgba(255,255,255,0.03)'%3E%C2%A7%3C/text%3E%3Ctext x='148' y='62' font-family='Georgia,serif' font-size='58' fill='rgba(255,255,255,0.03)'%3E%22%3C/text%3E%3Ctext x='310' y='55' font-family='Georgia,serif' font-size='44' fill='rgba(255,255,255,0.025)'%3E%C2%AB%3C/text%3E%3Ctext x='380' y='35' font-family='Georgia,serif' font-size='30' fill='rgba(255,255,255,0.03)'%3E%C2%B6%3C/text%3E%3Ctext x='440' y='60' font-family='Georgia,serif' font-size='48' fill='rgba(255,255,255,0.025)'%3E%C2%BB%3C/text%3E%3C/svg%3E");
-    background-repeat: repeat-x;
-    background-size: 520px 100%;
 }
 
 .header .container {
