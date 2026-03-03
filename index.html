@@ -142,9 +142,11 @@
                         >
                     </div>
 
-                    <!-- Barre d'outils -->
-                    <div class="toolbar editor-toolbar">
-                        <select class="toolbar-select" id="formatSelect">
+                    <!-- Barre d'outils style OpenOffice Writer -->
+                    <div class="toolbar editor-toolbar oo-toolbar">
+
+                        <!-- Groupe 1 : Style de paragraphe -->
+                        <select class="toolbar-select oo-select-style" id="formatSelect" title="Style de paragraphe">
                             <option value="p">Paragraphe</option>
                             <option value="h1">Titre 1</option>
                             <option value="h2">Titre 2</option>
@@ -155,39 +157,125 @@
                             <option value="blockquote">Citation</option>
                             <option value="pre">Code</option>
                         </select>
+
                         <div class="toolbar-separator"></div>
-                        <button class="toolbar-btn" data-command="bold" title="Gras (Ctrl+B)"><strong>B</strong></button>
-                        <button class="toolbar-btn" data-command="italic" title="Italique (Ctrl+I)"><em>I</em></button>
-                        <button class="toolbar-btn" data-command="underline" title="Souligné (Ctrl+U)"><u>U</u></button>
-                        <button class="toolbar-btn" data-command="strikeThrough" title="Barré"><s>S</s></button>
+
+                        <!-- Groupe 2 : Police & Taille -->
+                        <select class="toolbar-select oo-select-font" id="fontFamilySelect" title="Police de caractères">
+                            <option value="">Police par défaut</option>
+                            <option value="Arial, sans-serif">Arial</option>
+                            <option value="'Times New Roman', serif">Times New Roman</option>
+                            <option value="'Courier New', monospace">Courier New</option>
+                            <option value="Georgia, serif">Georgia</option>
+                            <option value="Verdana, sans-serif">Verdana</option>
+                            <option value="Helvetica, sans-serif">Helvetica</option>
+                            <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                        </select>
+                        <select class="toolbar-select oo-select-size" id="fontSizeSelect" title="Taille de police">
+                            <option value="1">8pt</option>
+                            <option value="2">10pt</option>
+                            <option value="3" selected>12pt</option>
+                            <option value="4">14pt</option>
+                            <option value="5">18pt</option>
+                            <option value="6">24pt</option>
+                            <option value="7">36pt</option>
+                        </select>
+
                         <div class="toolbar-separator"></div>
-                        <div class="color-picker-wrapper">
-                            <button class="toolbar-btn" title="Couleur du texte" onclick="document.getElementById('textColor').click()">A</button>
-                            <input type="color" id="textColor" class="color-input">
+
+                        <!-- Groupe 3 : Mise en forme du texte -->
+                        <button class="toolbar-btn oo-btn" data-command="bold" title="Gras (Ctrl+B)">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M15.6 10.79c.97-.67 1.65-1.77 1.65-2.79 0-2.26-1.75-4-4-4H7v14h7.04c2.09 0 3.71-1.7 3.71-3.79 0-1.52-.86-2.82-2.15-3.42zM10 6.5h3c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-3v-3zm3.5 9H10v-3h3.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5z"/></svg>
+                        </button>
+                        <button class="toolbar-btn oo-btn" data-command="italic" title="Italique (Ctrl+I)">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M10 4v3h2.21l-3.42 8H6v3h8v-3h-2.21l3.42-8H18V4h-8z"/></svg>
+                        </button>
+                        <button class="toolbar-btn oo-btn" data-command="underline" title="Souligné (Ctrl+U)">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 17c3.31 0 6-2.69 6-6V3h-2.5v8c0 1.93-1.57 3.5-3.5 3.5S8.5 12.93 8.5 11V3H6v8c0 3.31 2.69 6 6 6zm-7 2v2h14v-2H5z"/></svg>
+                        </button>
+                        <button class="toolbar-btn oo-btn" data-command="strikeThrough" title="Barré">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M10 19h4v-3h-4v3zM5 4v3h5v3h4V7h5V4H5zM3 14h18v-2H3v2z"/></svg>
+                        </button>
+
+                        <div class="toolbar-separator"></div>
+
+                        <!-- Groupe 4 : Couleurs -->
+                        <div class="color-picker-wrapper oo-color-wrap">
+                            <button class="toolbar-btn oo-btn oo-color-btn" title="Couleur du texte" onclick="document.getElementById('textColor').click()">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M11.14 3L5.5 21h2.11l1.3-4h6.18l1.3 4h2.11L12.86 3h-1.72zm-1.62 12 2.48-7.64L14.48 15H9.52z"/></svg>
+                                <span class="oo-color-bar" id="textColorBar" style="background:#000000"></span>
+                            </button>
+                            <input type="color" id="textColor" class="color-input" value="#000000">
                         </div>
-                        <div class="color-picker-wrapper">
-                            <button class="toolbar-btn" title="Couleur de fond" onclick="document.getElementById('bgColor').click()">🎨</button>
-                            <input type="color" id="bgColor" class="color-input">
+                        <div class="color-picker-wrapper oo-color-wrap">
+                            <button class="toolbar-btn oo-btn oo-color-btn" title="Couleur de surbrillance" onclick="document.getElementById('bgColor').click()">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M16.56 8.94L7.62 0 6.21 1.41l2.38 2.38-5.15 5.15c-.59.59-.59 1.54 0 2.12l5.5 5.5c.29.29.68.44 1.06.44s.77-.15 1.06-.44l5.5-5.5c.59-.58.59-1.53 0-2.12zM5.21 10 10 5.21 14.79 10H5.21zM19 11.5s-2 2.17-2 3.5c0 1.1.9 2 2 2s2-.9 2-2c0-1.33-2-3.5-2-3.5z"/><rect x="0" y="20" width="24" height="4" fill="currentColor" opacity=".36"/></svg>
+                                <span class="oo-color-bar" id="bgColorBar" style="background:#ffff00"></span>
+                            </button>
+                            <input type="color" id="bgColor" class="color-input" value="#ffff00">
                         </div>
+
                         <div class="toolbar-separator"></div>
-                        <button class="toolbar-btn" data-command="insertUnorderedList" title="Liste à puces">•</button>
-                        <button class="toolbar-btn" data-command="insertOrderedList" title="Liste numérotée">1.</button>
-                        <button class="toolbar-btn" data-command="outdent" title="Réduire le retrait">◁</button>
-                        <button class="toolbar-btn" data-command="indent" title="Augmenter le retrait">▷</button>
+
+                        <!-- Groupe 5 : Alignement -->
+                        <button class="toolbar-btn oo-btn" data-command="justifyLeft" title="Aligner à gauche (Ctrl+L)">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M15 15H3v2h12v-2zm0-8H3v2h12V7zM3 13h18v-2H3v2zm0 8h18v-2H3v2zM3 3v2h18V3H3z"/></svg>
+                        </button>
+                        <button class="toolbar-btn oo-btn" data-command="justifyCenter" title="Centrer (Ctrl+E)">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M7 15v2h10v-2H7zm-4 6h18v-2H3v2zm0-8h18v-2H3v2zm4-6v2h10V7H7zM3 3v2h18V3H3z"/></svg>
+                        </button>
+                        <button class="toolbar-btn oo-btn" data-command="justifyRight" title="Aligner à droite (Ctrl+R)">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M3 21h18v-2H3v2zm6-4h12v-2H9v2zm-6-4h18v-2H3v2zm6-4h12V7H9v2zM3 3v2h18V3H3z"/></svg>
+                        </button>
+                        <button class="toolbar-btn oo-btn" data-command="justifyFull" title="Justifier (Ctrl+J)">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M3 21h18v-2H3v2zm0-4h18v-2H3v2zm0-4h18v-2H3v2zm0-4h18V7H3v2zm0-6v2h18V3H3z"/></svg>
+                        </button>
+
                         <div class="toolbar-separator"></div>
-                        <button class="toolbar-btn" data-command="justifyLeft" title="Aligner à gauche">⬅</button>
-                        <button class="toolbar-btn" data-command="justifyCenter" title="Centrer">↔</button>
-                        <button class="toolbar-btn" data-command="justifyRight" title="Aligner à droite">➡</button>
-                        <button class="toolbar-btn" data-command="justifyFull" title="Justifier">⬌</button>
+
+                        <!-- Groupe 6 : Listes & Retraits -->
+                        <button class="toolbar-btn oo-btn" data-command="insertUnorderedList" title="Liste à puces">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M4 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm0-6c-.83 0-1.5.67-1.5 1.5S3.17 7.5 4 7.5 5.5 6.83 5.5 6 4.83 4.5 4 4.5zm0 12c-.83 0-1.5.68-1.5 1.5s.68 1.5 1.5 1.5 1.5-.68 1.5-1.5-.67-1.5-1.5-1.5zM7 19h14v-2H7v2zm0-6h14v-2H7v2zm0-8v2h14V5H7z"/></svg>
+                        </button>
+                        <button class="toolbar-btn oo-btn" data-command="insertOrderedList" title="Liste numérotée">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M2 17h2v.5H3v1h1v.5H2v1h3v-4H2v1zm1-9h1V4H2v1h1v3zm-1 3h1.8L2 13.1v.9h3v-1H3.2L5 10.9V10H2v1zm5-6v2h14V5H7zm0 14h14v-2H7v2zm0-6h14v-2H7v2z"/></svg>
+                        </button>
+                        <button class="toolbar-btn oo-btn" data-command="outdent" title="Réduire le retrait">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M11 17h10v-2H11v2zm-8-5 4 4V8l-4 4zm0 9h18v-2H3v2zM3 3v2h18V3H3zm8 6h10V7H11v2zm0 4h10v-2H11v2z"/></svg>
+                        </button>
+                        <button class="toolbar-btn oo-btn" data-command="indent" title="Augmenter le retrait">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M3 21h18v-2H3v2zM3 8v8l4-4-4-4zm8 9h10v-2H11v2zM3 3v2h18V3H3zm8 6h10V7H11v2zm0 4h10v-2H11v2z"/></svg>
+                        </button>
+
                         <div class="toolbar-separator"></div>
-                        <button class="toolbar-btn" id="linkBtn" title="Insérer un lien">🔗</button>
-                        <button class="toolbar-btn" id="unlinkBtn" data-command="unlink" title="Supprimer le lien">🔓</button>
-                        <button class="toolbar-btn" id="imageBtn" title="Insérer une image">🖼️</button>
+
+                        <!-- Groupe 7 : Lien / Image -->
+                        <button class="toolbar-btn oo-btn" id="linkBtn" title="Insérer un lien (Ctrl+K)">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
+                        </button>
+                        <button class="toolbar-btn oo-btn" id="unlinkBtn" data-command="unlink" title="Supprimer le lien">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M17 7h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1 0 1.43-.98 2.63-2.31 2.98l1.46 1.46C20.59 15.99 22 14.17 22 12c0-2.76-2.24-5-5-5zm-1 4h-2.19l2 2H16v-2zM2 4.27l3.11 3.11C3.29 8.12 2 9.91 2 12c0 2.76 2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1 0-1.59 1.21-2.9 2.76-3.07L8.73 11H8v2h2.73l2 2H8v1.9h3.27L13 18.73V17h4l1.73 1.73L20 17.46 3.27 2.73 2 4.27z"/></svg>
+                        </button>
+                        <button class="toolbar-btn oo-btn" id="imageBtn" title="Insérer une image">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+                        </button>
+
                         <div class="toolbar-separator"></div>
-                        <button class="toolbar-btn" data-command="undo" title="Annuler (Ctrl+Z)">↶</button>
-                        <button class="toolbar-btn" data-command="redo" title="Rétablir (Ctrl+Y)">↷</button>
-                        <button class="toolbar-btn" data-command="removeFormat" title="Supprimer le formatage">✖</button>
-                        <button class="toolbar-btn" id="sourceBtn" title="Voir le code HTML">&lt;/&gt;</button>
+
+                        <!-- Groupe 8 : Annuler / Rétablir / Nettoyer / Source -->
+                        <button class="toolbar-btn oo-btn" data-command="undo" title="Annuler (Ctrl+Z)">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg>
+                        </button>
+                        <button class="toolbar-btn oo-btn" data-command="redo" title="Rétablir (Ctrl+Y)">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M18.4 10.6C16.55 8.99 14.15 8 11.5 8c-4.65 0-8.58 3.03-9.96 7.22L3.9 16c1.05-3.19 4.05-5.5 7.6-5.5 1.95 0 3.73.72 5.12 1.88L13 16h9V7l-3.6 3.6z"/></svg>
+                        </button>
+                        <button class="toolbar-btn oo-btn" data-command="removeFormat" title="Supprimer le formatage">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M3.27 5 2 6.27l6.97 6.97L6.5 19h3l1.57-3.66L16.73 21 18 19.73 3.27 5zM6 5v.18L8.82 8h2.4l-.72 1.68 2.1 2.1L14.21 8H20V5H6z"/></svg>
+                        </button>
+                        <button class="toolbar-btn oo-btn" id="sourceBtn" title="Code source HTML">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M9.4 16.6 4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0 4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
+                        </button>
+
                     </div>
 
                     <!-- Zone d'édition -->

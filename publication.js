@@ -123,6 +123,8 @@ async function initEditor() {
     if (textColor) {
         textColor.addEventListener('change', (e) => {
             document.execCommand('foreColor', false, e.target.value);
+            const bar = document.getElementById('textColorBar');
+            if (bar) bar.style.background = e.target.value;
             editor.focus();
         });
     }
@@ -131,6 +133,28 @@ async function initEditor() {
     if (bgColor) {
         bgColor.addEventListener('change', (e) => {
             document.execCommand('backColor', false, e.target.value);
+            const bar = document.getElementById('bgColorBar');
+            if (bar) bar.style.background = e.target.value;
+            editor.focus();
+        });
+    }
+
+    // Police de caractères
+    const fontFamilySelect = document.getElementById('fontFamilySelect');
+    if (fontFamilySelect) {
+        fontFamilySelect.addEventListener('change', (e) => {
+            if (e.target.value) {
+                document.execCommand('fontName', false, e.target.value);
+            }
+            editor.focus();
+        });
+    }
+
+    // Taille de police
+    const fontSizeSelect = document.getElementById('fontSizeSelect');
+    if (fontSizeSelect) {
+        fontSizeSelect.addEventListener('change', (e) => {
+            document.execCommand('fontSize', false, e.target.value);
             editor.focus();
         });
     }
