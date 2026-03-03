@@ -791,16 +791,15 @@ body.editor-page .main {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+    transition: background 0.2s, box-shadow 0.2s;
     box-shadow: 0 0 0 2px #ffffff;
 }
 .sc-play-btn:hover {
     background: #f5f5f5;
-    transform: scale(1.06);
     box-shadow: 0 0 0 2px #ffffff;
 }
 .sc-play-btn:active {
-    transform: scale(0.95);
+    background: #e8e8e8;
 }
 
 .sc-thumb {
