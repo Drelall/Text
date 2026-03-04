@@ -96,10 +96,24 @@ async function initEditor() {
     // Charger la préférence du mode nuit
     loadDarkModePreference();
 
+    // Compteur de mots et de signes
+    function updateWordCounter() {
+        const text = editor.innerText || '';
+        const trimmed = text.trim();
+        const words = trimmed === '' ? 0 : trimmed.split(/\s+/).length;
+        const chars = trimmed.replace(/\s/g, '').length;
+        document.getElementById('statWords').textContent =
+            words.toLocaleString('fr-FR') + (words <= 1 ? '\u00a0mot' : '\u00a0mots');
+        document.getElementById('statChars').textContent =
+            chars.toLocaleString('fr-FR') + (chars <= 1 ? '\u00a0signe' : '\u00a0signes');
+    }
+    updateWordCounter();
+
     // Détecter les modifications
     editor.addEventListener('input', () => {
         hasUnsavedChanges = true;
         markAsModified();
+        updateWordCounter();
     });
 
     articleSubject.addEventListener('input', () => {
@@ -291,6 +305,7 @@ async function initEditor() {
 
             const applyContent = (html) => {
                 editor.innerHTML = html || '<p></p>';
+                updateWordCounter();
                 if (!articleSubject.value.trim()) {
                     articleSubject.value = defaultSubject;
                 }
@@ -501,6 +516,7 @@ async function initEditor() {
         } else {
             const html = editor.textContent;
             editor.innerHTML = html;
+            updateWordCounter();
             editor.contentEditable = 'true';
             editor.style.fontFamily = 'Georgia, "Times New Roman", serif';
             editor.style.whiteSpace = 'normal';
@@ -688,6 +704,7 @@ async function initEditor() {
         currentArticleId = null;
         articleSubject.value = '';
         editor.innerHTML = '<p>Hello !</p>';
+        updateWordCounter();
         hasUnsavedChanges = false;
         markAsSaved();
         await refreshArticlesList();
@@ -771,6 +788,7 @@ async function initEditor() {
         if (article) {
             articleSubject.value = article.subject;
             editor.innerHTML = article.content;
+            updateWordCounter();
             currentArticleId = article.id;
             
             hasUnsavedChanges = false;
@@ -833,6 +851,7 @@ async function initEditor() {
         
         if (savedContent) {
             editor.innerHTML = savedContent;
+            updateWordCounter();
         }
         
         if (savedSubject) {

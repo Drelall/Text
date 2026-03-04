@@ -637,11 +637,12 @@ body.editor-page .main {
     color: var(--editor-text-primary);
     border: 1px solid var(--editor-border-color);
     border-top: none;
-    border-radius: 0 0 2px 2px;
+    border-bottom: none;
+    border-radius: 0;
     font-family: Georgia, 'Times New Roman', serif;
     font-size: 1.125rem;
     line-height: 1.8;
-    margin-bottom: 2rem;
+    margin-bottom: 0;
 }
 
 .editor-area:focus {
@@ -707,6 +708,26 @@ body.editor-page .main {
 .wp-button.primary:hover {
     background: var(--editor-accent-hover);
     border-color: var(--editor-accent-hover);
+}
+
+/* ── Compteur de mots / signes ── */
+.word-counter {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.4rem 0.9rem;
+    background: var(--editor-bg-secondary);
+    border: 1px solid var(--editor-border-color);
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    font-size: 12px;
+    color: var(--editor-text-muted);
+    user-select: none;
+    margin-bottom: 2rem;
+}
+
+.word-counter-sep {
+    opacity: 0.4;
 }
 
 .status-message {
