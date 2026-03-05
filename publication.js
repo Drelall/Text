@@ -96,6 +96,62 @@ async function initEditor() {
     // Charger la préférence du mode nuit
     loadDarkModePreference();
 
+    // ─── Utilitaires pour l'import de fichiers texte ──────────────────────
+    function escapeHtml(text) {
+        return (text || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    // Convertir le XML d'un fichier .odt en HTML simple (paragraphes / titres)
+    function convertOdtXmlToHtml(xmlString) {
+        try {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlString, 'application/xml');
+
+            const officeNs = 'urn:oasis:names:tc:opendocument:xmlns:office:1.0';
+            const textNs   = 'urn:oasis:names:tc:opendocument:xmlns:text:1.0';
+
+            const officeText = xmlDoc.getElementsByTagNameNS(officeNs, 'text')[0] || xmlDoc.documentElement;
+            if (!officeText) return '<p>(Aucun contenu lisible dans ce fichier .odt)</p>';
+
+            const parts = [];
+
+            function handleElement(el) {
+                const local = el.localName;
+                const rawText = (el.textContent || '').trim();
+                if (!rawText) return;
+                const safeText = escapeHtml(rawText);
+
+                if (local === 'h') {
+                    const lvlAttr = el.getAttribute('text:outline-level') || el.getAttribute('outline-level') || '1';
+                    let level = parseInt(lvlAttr, 10);
+                    if (!level || level < 1) level = 1;
+                    if (level > 6) level = 6;
+                    parts.push(`<h${level}>${safeText}</h${level}>`);
+                } else if (local === 'p') {
+                    parts.push(`<p>${safeText}</p>`);
+                }
+            }
+
+            officeText.childNodes.forEach((node) => {
+                if (node.nodeType === Node.ELEMENT_NODE && (node.localName === 'p' || node.localName === 'h') &&
+                    (node.namespaceURI === textNs || !node.namespaceURI)) {
+                    handleElement(node);
+                }
+            });
+
+            if (!parts.length) {
+                return '<p>(Aucun contenu texte trouvé dans ce fichier .odt)</p>';
+            }
+            return parts.join('\n');
+        } catch (e) {
+            console.error('Erreur conversion XML .odt → HTML', e);
+            return '<p>(Erreur lors de la lecture du contenu .odt)</p>';
+        }
+    }
+
     // Compteur de mots et de signes
     function updateWordCounter() {
         const text = editor.innerText || '';
@@ -292,7 +348,12 @@ async function initEditor() {
     loadBtn.addEventListener('click', () => {
         const input = document.createElement('input');
         input.type = 'file';
-        input.accept = '.html,.htm,.txt,.md,.docx,.rtf,.odt';
+        // Formats proposés :
+        // - .docx (Word moderne) via mammoth.js
+        // - .odt  (OpenOffice/LibreOffice) via JSZip + parsing XML
+        // - .html / .htm (exports HTML)
+        // - .txt, .md (texte brut / Markdown)
+        input.accept = '.html,.htm,.txt,.md,.docx,.odt';
 
         input.onchange = (e) => {
             const file = e.target.files[0];
@@ -315,17 +376,45 @@ async function initEditor() {
                 editor.focus();
             };
 
-            // Fichier Word .docx → mammoth.js
+            // Fichier Word .docx → mammoth.js (HTML riche)
             if (ext === 'docx') {
                 if (typeof mammoth === 'undefined') {
-                    alert('Import Word indisponible hors connexion.');
+                    alert('Import Word (.docx) indisponible : la librairie mammoth.js n\'est pas chargée.\nVérifiez que vous êtes connecté à Internet.');
                     return;
                 }
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     mammoth.convertToHtml({ arrayBuffer: event.target.result })
-                        .then(result => applyContent(result.value))
-                        .catch(() => alert('Impossible de lire ce fichier Word.'));
+                        .then(result => {
+                            applyContent(result.value || '');
+                        })
+                        .catch((err) => {
+                            console.error('Erreur import .docx', err);
+                            alert('Impossible de lire ce fichier Word (.docx).');
+                        });
+                };
+                reader.readAsArrayBuffer(file);
+                return;
+            }
+
+            // Fichier OpenDocument .odt → JSZip + parsing du XML content.xml
+            if (ext === 'odt') {
+                if (typeof JSZip === 'undefined') {
+                    alert('Import OpenOffice/LibreOffice (.odt) indisponible : la librairie JSZip n\'est pas chargée.\nVérifiez que vous êtes connecté à Internet.');
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    JSZip.loadAsync(event.target.result)
+                        .then(zip => zip.file('content.xml').async('string'))
+                        .then(xmlString => {
+                            const html = convertOdtXmlToHtml(xmlString);
+                            applyContent(html);
+                        })
+                        .catch((err) => {
+                            console.error('Erreur import .odt', err);
+                            alert('Impossible de lire ce fichier .odt. Essayez de l\'enregistrer en .docx ou .txt.');
+                        });
                 };
                 reader.readAsArrayBuffer(file);
                 return;
