@@ -69,6 +69,7 @@ async function initEditor() {
     const imageBtn = document.getElementById('imageBtn');
     const sourceBtn = document.getElementById('sourceBtn');
     const saveBtn = document.getElementById('saveBtn');
+    const saveAsBtn = document.getElementById('saveAsBtn');
     const addBtn = document.getElementById('addBtn');
     const loadBtn = document.getElementById('loadBtn');
     const newArticleBtn = document.getElementById('newArticleBtn');
@@ -367,19 +368,33 @@ async function initEditor() {
     editor.addEventListener('mouseup', updateToolbarState);
     editor.addEventListener('keyup', updateToolbarState);
 
-    // Bouton Enregistrer
-    saveBtn.addEventListener('click', () => {
-        publishArticle();
+    // Bouton Enregistrer : enregistre dans la colonne "Mes articles" (mise à jour ou création)
+    saveBtn.addEventListener('click', async () => {
+        const subject = articleSubject.value.trim();
+        if (!subject) {
+            showStatus('\u26a0\ufe0f Veuillez saisir un objet pour l\'article', 'error');
+            return;
+        }
+        await saveArticleToList(subject, editor.innerHTML);
+        markAsSaved();
+        showStatus('\u2713 Article enregistr\u00e9 dans "Mes articles"', 'success');
     });
 
-    // Bouton Ajouter (sauvegarde dans la liste sans exporter)
+    // Bouton Enregistrer sous : export .txt / .docx sur le PC
+    if (saveAsBtn) {
+        saveAsBtn.addEventListener('click', () => {
+            publishArticle();
+        });
+    }
+
+    // Bouton Ajouter (crée TOUJOURS une nouvelle carte dans la colonne "Mes articles")
     addBtn.addEventListener('click', async () => {
         const subject = articleSubject.value.trim();
         if (!subject) {
             alert('Veuillez saisir un objet avant d\'ajouter l\'article.');
             return;
         }
-        await saveArticleToList(subject, editor.innerHTML);
+        await saveArticleToList(subject, editor.innerHTML, { forceNew: true });
         markAsSaved();
     });
 
@@ -787,14 +802,10 @@ async function initEditor() {
         modal.querySelector('#_dlTxt').addEventListener('click', async () => {
             close();
             await downloadTextFile(subject, plainText);
-            await saveArticleToList(subject, htmlContent);
-            markAsSaved();
         });
         modal.querySelector('#_dlDoc').addEventListener('click', async () => {
             close();
             await downloadWordFile(subject, htmlContent);
-            await saveArticleToList(subject, htmlContent);
-            markAsSaved();
         });
         modal.querySelector('#_dlCancel').addEventListener('click', close);
         overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
@@ -928,10 +939,12 @@ async function initEditor() {
     /**
      * Sauvegarde l'article dans la liste (IndexedDB)
      */
-    async function saveArticleToList(subject, content) {
+    async function saveArticleToList(subject, content, options = {}) {
+        const forceNew = options.forceNew === true;
+        const id = (!forceNew && currentArticleId) ? currentArticleId : Date.now();
+
         const article = {
-            // Toujours un nouvel identifiant pour ne pas écraser un article existant
-            id: Date.now(),
+            id: id,
             subject: subject,
             content: content,
             preview: getTextPreview(content),
@@ -967,10 +980,14 @@ async function initEditor() {
             <div class="article-card-item ${article.id === currentArticleId ? 'active' : ''}" data-id="${article.id}">
                 <div class="article-card-subject">${escapeHtml(article.subject)}</div>
                 <div class="article-card-preview">${escapeHtml(article.preview)}</div>
-                <div class="article-card-date">${article.date}</div>
-                <button class="article-card-delete" data-id="${article.id}" onclick="event.stopPropagation()" title="Supprimer l'article" aria-label="Supprimer l'article">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-                </button>
+                <div class="article-card-footer">
+                    <span class="article-card-date">${article.date}</span>
+                    <div class="article-card-actions">
+                        <button class="article-card-delete" data-id="${article.id}" onclick="event.stopPropagation()" title="Supprimer l'article" aria-label="Supprimer l'article">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
+                    </div>
+                </div>
             </div>
         `).join('');
         
@@ -980,7 +997,7 @@ async function initEditor() {
                 await loadArticleFromList(id);
             });
         });
-        
+
         articlesList.querySelectorAll('.article-card-delete').forEach(btn => {
             btn.addEventListener('click', async () => {
                 const id = parseInt(btn.dataset.id);

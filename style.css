@@ -257,6 +257,43 @@ body.editor-page .main {
     font-size: 0.85rem;
 }
 
+/* ========================================
+   CARTES "MES ARTICLES" – ACTIONS
+   ======================================== */
+.article-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.article-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.article-card-edit,
+.article-card-delete {
+    background: transparent;
+    border: none;
+    color: var(--editor-text-muted);
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 4px;
+}
+
+.article-card-edit:hover,
+.article-card-delete:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--editor-text-secondary);
+}
+
+body.dark-mode .article-card-edit:hover,
+body.dark-mode .article-card-delete:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
 /* Dark mode toggle button */
 .dark-mode-toggle {
     background: transparent;
