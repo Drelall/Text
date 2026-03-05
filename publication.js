@@ -152,6 +152,50 @@ async function initEditor() {
         }
     }
 
+        // Extraire le HTML d'un fichier MHT (afchunk.mht généré par html-docx-js)
+        function extractHtmlFromMht(mhtString) {
+            try {
+                if (!mhtString) return '';
+
+                const lower = mhtString.toLowerCase();
+                const idxHtml = lower.indexOf('content-type: text/html');
+                if (idxHtml === -1) return '';
+
+                // Fin des en-têtes de la partie HTML : double saut de ligne
+                const sepCRLF = mhtString.indexOf('\r\n\r\n', idxHtml);
+                const sepLF = mhtString.indexOf('\n\n', idxHtml);
+                let start;
+                if (sepCRLF !== -1 && (sepLF === -1 || sepCRLF < sepLF)) {
+                    start = sepCRLF + 4;
+                } else if (sepLF !== -1) {
+                    start = sepLF + 2;
+                } else {
+                    return '';
+                }
+
+                // Limite : prochaine ligne de séparation de partie MHT
+                let end = mhtString.indexOf('\n------=', start);
+                const altEnd = mhtString.indexOf('\r\n------=', start);
+                if (end === -1 || (altEnd !== -1 && altEnd < end)) {
+                    end = altEnd;
+                }
+                if (end === -1) {
+                    end = mhtString.length;
+                }
+
+                let qp = mhtString.substring(start, end);
+
+                // Décodage minimal quoted-printable utilisé par html-docx-js
+                qp = qp.replace(/=\r\n/g, '').replace(/=\n/g, ''); // retours à la ligne doux
+                qp = qp.replace(/=3D/g, '='); // '=' encodé
+
+                return qp.trim();
+            } catch (e) {
+                console.error('Erreur extraction HTML depuis MHT', e);
+                return '';
+            }
+        }
+
     // Compteur de mots et de signes
     function updateWordCounter() {
         const text = editor.innerText || '';
@@ -376,23 +420,104 @@ async function initEditor() {
                 editor.focus();
             };
 
-            // Fichier Word .docx → mammoth.js (HTML riche)
+            // Fichier Word .docx → priorité à mammoth.js, puis fallback JSZip
             if (ext === 'docx') {
-                if (typeof mammoth === 'undefined') {
-                    alert('Import Word (.docx) indisponible : la librairie mammoth.js n\'est pas chargée.\nVérifiez que vous êtes connecté à Internet.');
-                    return;
-                }
                 const reader = new FileReader();
+
                 reader.onload = (event) => {
-                    mammoth.convertToHtml({ arrayBuffer: event.target.result })
+                    const arrayBuffer = event.target.result;
+
+                    const tryJsZipFallback = () => {
+                        if (typeof JSZip === 'undefined') {
+                            return Promise.resolve(false);
+                        }
+                        return JSZip.loadAsync(arrayBuffer)
+                            .then(zip => {
+                                // Cas html-docx-js : HTML embarqué dans word/afchunk.mht
+                                const afchunk = zip.file('word/afchunk.mht');
+                                if (afchunk) {
+                                    return afchunk.async('string').then(mht => {
+                                        const html = extractHtmlFromMht(mht);
+                                        if (html && html.trim()) {
+                                            applyContent(html);
+                                            return true;
+                                        }
+                                        return false;
+                                    });
+                                }
+
+                                // Cas html-docx-js : HTML embarqué dans un fichier .html du dossier word/
+                                const htmlEntries = zip.file(/word\/.*\.html$/i);
+                                if (htmlEntries && htmlEntries.length > 0) {
+                                    return htmlEntries[0].async('string').then(html => {
+                                        applyContent(html);
+                                        return true;
+                                    });
+                                }
+
+                                // Fallback générique : on essaie de lire word/document.xml
+                                const docFile = zip.file('word/document.xml');
+                                if (!docFile) return false;
+                                return docFile.async('string').then(xml => {
+                                    // Extraction très simple du texte des balises <w:t>
+                                    try {
+                                        const matches = xml.match(/<w:t[^>]*>([\s\S]*?)<\/w:t>/g) || [];
+                                        const paragraphs = matches
+                                            .map(m => m.replace(/<\/?w:t[^>]*>/g, ''))
+                                            .map(t => t.replace(/\s+/g, ' ').trim())
+                                            .filter(t => t.length > 0);
+
+                                        if (!paragraphs.length) return false;
+
+                                        const safe = paragraphs
+                                            .map(p => p
+                                                .replace(/&/g, '&amp;')
+                                                .replace(/</g, '&lt;')
+                                                .replace(/>/g, '&gt;'))
+                                            .map(p => `<p>${p}</p>`)
+                                            .join('\n');
+                                        applyContent(safe);
+                                        return true;
+                                    } catch (e) {
+                                        console.error('Erreur parsing XML .docx', e);
+                                        return false;
+                                    }
+                                });
+                            })
+                            .catch(err => {
+                                console.error('Erreur import .docx (JSZip)', err);
+                                return false;
+                            });
+                    };
+
+                    const finishWithError = () => {
+                        alert('Impossible de lire ce fichier Word (.docx).');
+                    };
+
+                    if (typeof mammoth === 'undefined') {
+                        // Pas de mammoth : on tente directement le fallback JSZip
+                        tryJsZipFallback().then(ok => { if (!ok) finishWithError(); });
+                        return;
+                    }
+
+                    // Tentative avec mammoth (cas des vrais .docx issus de Word)
+                    mammoth.convertToHtml({ arrayBuffer })
                         .then(result => {
-                            applyContent(result.value || '');
+                            const html = (result && result.value) ? result.value.trim() : '';
+                            if (html) {
+                                applyContent(html);
+                                return true;
+                            }
+                            return false;
                         })
-                        .catch((err) => {
-                            console.error('Erreur import .docx', err);
-                            alert('Impossible de lire ce fichier Word (.docx).');
-                        });
+                        .catch(err => {
+                            console.error('Erreur import .docx (mammoth)', err);
+                            return false;
+                        })
+                        .then(ok => ok ? true : tryJsZipFallback())
+                        .then(okFinal => { if (!okFinal) finishWithError(); });
                 };
+
                 reader.readAsArrayBuffer(file);
                 return;
             }
