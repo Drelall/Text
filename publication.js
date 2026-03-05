@@ -930,7 +930,8 @@ async function initEditor() {
      */
     async function saveArticleToList(subject, content) {
         const article = {
-            id: currentArticleId || Date.now(),
+            // Toujours un nouvel identifiant pour ne pas écraser un article existant
+            id: Date.now(),
             subject: subject,
             content: content,
             preview: getTextPreview(content),
