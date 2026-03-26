@@ -177,12 +177,18 @@ body.dark-mode {
 
 body.editor-page {
     background: var(--editor-bg-primary);
+    height: 100vh;
+    overflow: hidden;
 }
 
 body.editor-page .main {
     background: var(--editor-bg-primary);
     padding: 0;
     flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 
 /* ========================================
@@ -354,6 +360,9 @@ body.dark-mode .article-card-delete:hover {
     flex-wrap: wrap;
     gap: 2px;
     margin-bottom: 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .toolbar-btn {
@@ -490,7 +499,9 @@ body.dark-mode .article-card-delete:hover {
     border-radius: 0;
     display: flex;
     gap: 0;
-    min-height: calc(100vh - 200px);
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .sidebar {
@@ -633,6 +644,7 @@ body.dark-mode .article-card-delete:hover {
     background: var(--editor-bg-secondary);
     padding: 0;
     min-width: 0;
+    overflow-y: auto;
 }
 
 .editor-wrapper {
@@ -1106,6 +1118,7 @@ body.dark-mode .article-card-delete:hover {
     .editor-container {
         flex-direction: column;
         min-height: unset;
+        overflow-y: auto;
     }
 
     /* Sidebar masquée par défaut, ouverte avec .open */
